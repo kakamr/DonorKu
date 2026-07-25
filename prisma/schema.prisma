@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id_admin         Int             @id @default(autoincrement())
+  nama_admin       String          @db.VarChar(100)
+  email            String          @unique(map: "email") @db.VarChar(100)
+  password         String          @db.VarChar(255)
+  foto_profil      String?         @db.VarChar(255)
+  alamat           String?         @db.Text
+  no_hp            String?         @db.VarChar(20)
+  reset_otp        String?         @db.VarChar(6)
+  reset_otp_expiry DateTime?       @db.DateTime(0)
+  aturan_tips      AturanDanTips[]
+  jadwal_donor     JadwalDonor[]
+  lokasi_donor     LokasiDonor[]
+  pendaftaran      Pendaftaran[]
+  pendonor         Pendonor[]
+  riwayat_donor    RiwayatDonor[]
+  stok_darah       StokDarah[]
+
+  @@map("admin")
+}
+
+model LokasiDonor {
+  id_lokasi    Int           @id @default(autoincrement())
+  id_admin     Int
+  nama_lokasi  String        @db.VarChar(150)
+  alamat       String        @db.Text
+  kota         String        @db.VarChar(100)
+  no_hp        String?       @db.VarChar(20)
+  longitude    Decimal?      @db.Decimal(10, 7)
+  latitude     Decimal?      @db.Decimal(10, 7)
+  jadwal_donor JadwalDonor[]
+  admin        Admin         @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_lokasi_admin")
+  stok_darah   StokDarah[]
+
+  @@index([id_admin], map: "fk_lokasi_admin")
+  @@map("lokasi_donor")
+}
+
+model Pendonor {
+  id_pendonor    Int                    @id @default(autoincrement())
+  id_admin       Int
+  nik            String                 @unique(map: "nik") @db.VarChar(16)
+  nama_lengkap   String                 @db.VarChar(100)
+  jenis_kelamin  pendonor_jenis_kelamin
+  tanggal_lahir  DateTime               @db.Date
+  berat_badan    Decimal?               @db.Decimal(5, 2)
+  tinggi_badan   Decimal?               @db.Decimal(5, 2)
+  alamat         String?                @db.Text
+  no_hp          String?                @db.VarChar(20)
+  email          String                 @unique(map: "email") @db.VarChar(100)
+  password       String                 @db.VarChar(255)
+  foto_profil    String?                @db.VarChar(255)
+  golongan_darah String                 @default("O+") @db.VarChar(3)
+  pendaftaran    Pendaftaran[]
+  admin          Admin                  @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_pendonor_admin")
+  riwayat_donor  RiwayatDonor[]
+
+  @@index([id_admin], map: "fk_pendonor_admin")
+  @@map("pendonor")
+}
+
+model JadwalDonor {
+  id_jadwal               Int                        @id @default(autoincrement())
+  id_admin                Int
+  id_lokasi               Int
+  status_jadwal           jadwal_donor_status_jadwal @default(aktif)
+  kuota                   Int
+  jam_mulai               DateTime                   @db.Time(0)
+  jam_selesai             DateTime                   @db.Time(0)
+  nomor_antrian           Int?                       @default(0)
+  nama_penanggung_jawab   String?                    @db.VarChar(100)
+  kontak_penanggung_jawab String?                    @db.VarChar(20)
+  total_pendonor_offline  Int?
+  pendonor_hadir          Int?
+  darah_terkumpul         Int?
+  foto_lokasi             String?                    @db.Text
+  tanggal_pelaksanaan     DateTime?                  @db.Date
+  admin                   Admin                      @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_jadwal_admin")
+  lokasi                  LokasiDonor                @relation(fields: [id_lokasi], references: [id_lokasi], onDelete: Cascade, map: "fk_jadwal_lokasi")
+  pendaftaran             Pendaftaran[]
+
+  @@index([id_admin], map: "fk_jadwal_admin")
+  @@index([id_lokasi], map: "fk_jadwal_lokasi")
+  @@map("jadwal_donor")
+}
+
+model Pendaftaran {
+  id_pendaftaran     Int                            @id @default(autoincrement())
+  id_admin           Int
+  id_pendonor        Int
+  id_jadwal          Int
+  nomor_antrian      Int
+  tanggal_daftar     DateTime                       @default(now()) @db.DateTime(0)
+  status_pendaftaran pendaftaran_status_pendaftaran @default(menunggu)
+  admin              Admin                          @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_pendaftaran_admin")
+  jadwal             JadwalDonor                    @relation(fields: [id_jadwal], references: [id_jadwal], onDelete: Cascade, map: "fk_pendaftaran_jadwal")
+  pendonor           Pendonor                       @relation(fields: [id_pendonor], references: [id_pendonor], onDelete: Cascade, map: "fk_pendaftaran_pendonor")
+
+  @@index([id_admin], map: "fk_pendaftaran_admin")
+  @@index([id_jadwal], map: "fk_pendaftaran_jadwal")
+  @@index([id_pendonor], map: "fk_pendaftaran_pendonor")
+  @@map("pendaftaran")
+}
+
+model RiwayatDonor {
+  id_riwayat      Int                        @id @default(autoincrement())
+  id_admin        Int
+  id_pendonor     Int
+  tanggal_donor   DateTime                   @db.Date
+  status_donor    riwayat_donor_status_donor
+  lokasi_donor    String                     @db.VarChar(150)
+  keterangan      String?                    @db.Text
+  darah_terkumpul Int?
+  admin           Admin                      @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_riwayat_admin")
+  pendonor        Pendonor                   @relation(fields: [id_pendonor], references: [id_pendonor], onDelete: Cascade, map: "fk_riwayat_pendonor")
+
+  @@index([id_admin], map: "fk_riwayat_admin")
+  @@index([id_pendonor], map: "fk_riwayat_pendonor")
+  @@map("riwayat_donor")
+}
+
+model StokDarah {
+  id_stok        Int          @id @default(autoincrement())
+  id_admin       Int
+  tanggal_update DateTime     @default(now()) @db.DateTime(0)
+  golongan_darah String       @db.VarChar(3)
+  jumlah_kantong Int          @default(0)
+  id_lokasi      Int?
+  admin          Admin        @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_stok_admin")
+  lokasi         LokasiDonor? @relation(fields: [id_lokasi], references: [id_lokasi], onDelete: Restrict, onUpdate: Restrict, map: "fk_stok_lokasi")
+
+  @@index([id_admin], map: "fk_stok_admin")
+  @@index([id_lokasi], map: "fk_stok_lokasi")
+  @@map("stok_darah")
+}
+
+model AturanDanTips {
+  id_tips        Int                    @id @default(autoincrement())
+  id_admin       Int
+  judul          String                 @db.VarChar(150)
+  tanggal_dibuat DateTime               @default(now()) @db.DateTime(0)
+  tanggal_diubah DateTime?              @updatedAt @db.DateTime(0)
+  status         aturan_dan_tips_status @default(draft)
+  kategori       String                 @db.VarChar(100)
+  isi            String                 @db.Text
+  admin          Admin                  @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_tips_admin")
+
+  @@index([id_admin], map: "fk_tips_admin")
+  @@map("aturan_dan_tips")
+}
+
+enum jadwal_donor_status_jadwal {
+  aktif
+  nonaktif
+  selesai
+}
+
+enum pendonor_jenis_kelamin {
+  Laki_laki @map("Laki-laki")
+  Perempuan
+}
+
+enum riwayat_donor_status_donor {
+  berhasil
+  gagal
+  ditunda
+}
+
+enum aturan_dan_tips_status {
+  publish
+  draft
+}
+
+enum pendaftaran_status_pendaftaran {
+  menunggu
+  diterima
+  ditolak
+  batal
+}
