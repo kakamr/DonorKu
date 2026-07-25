@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-const IDLE_LIMIT_MS = 15 * 60 * 1000; // 15 menit tidak ada aktivitas -> logout
-const WARNING_BEFORE_MS = 60 * 1000; // tampilkan peringatan 1 menit sebelum logout
+const IDLE_LIMIT_MS = 15 * 60 * 1000; 
+const WARNING_BEFORE_MS = 60 * 1000; 
 
 export default function IdleLogoutHandler() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function IdleLogoutHandler() {
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
   const warningTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch (error) {
@@ -20,9 +20,9 @@ export default function IdleLogoutHandler() {
     } finally {
       router.push("/login");
     }
-  };
+  }, [router]);
 
-  const resetTimers = () => {
+  const resetTimers = useCallback(() => {
     setShowWarning(false);
 
     if (idleTimer.current) clearTimeout(idleTimer.current);
@@ -31,25 +31,28 @@ export default function IdleLogoutHandler() {
     warningTimer.current = setTimeout(() => {
       setShowWarning(true);
     }, IDLE_LIMIT_MS - WARNING_BEFORE_MS);
-
+    
     idleTimer.current = setTimeout(() => {
       handleLogout();
     }, IDLE_LIMIT_MS);
-  };
+  }, [handleLogout]);
 
   useEffect(() => {
-    const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart"];
-
+    const events = [
+      "mousemove",
+      "mousedown",
+      "keydown",
+      "scroll",
+      "touchstart",
+    ];
     events.forEach((event) => window.addEventListener(event, resetTimers));
-    resetTimers(); // mulai timer pertama kali
-
+    resetTimers();
     return () => {
       events.forEach((event) => window.removeEventListener(event, resetTimers));
       if (idleTimer.current) clearTimeout(idleTimer.current);
       if (warningTimer.current) clearTimeout(warningTimer.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [resetTimers]);
 
   if (!showWarning) return null;
 

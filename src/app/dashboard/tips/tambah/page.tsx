@@ -28,7 +28,7 @@ export default function TambahAturanTipsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          id_admin: 1, // TODO: ambil dari session admin yang login
+          id_admin: 1, 
         }),
       });
 

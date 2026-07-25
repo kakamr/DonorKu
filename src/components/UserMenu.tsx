@@ -31,7 +31,6 @@ export default function UserMenu() {
       const res = await fetch("/api/admin/me");
       if (!res.ok) return;
       const data = await res.json();
-      // ambil nama depan saja, atau sesuaikan kalau mau nama lengkap
       const firstName = data.nama_admin?.split(" ").pop() ?? data.nama_admin;
       setNama(firstName || "Admin");
       setFotoProfil(data.foto_profil ?? null);

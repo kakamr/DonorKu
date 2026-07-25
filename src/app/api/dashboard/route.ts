@@ -13,7 +13,6 @@ export async function GET() {
 
     const startOfYear = new Date(today.getFullYear(), 0, 1);
 
-    // === Statistik donor per bulan (tahun berjalan) ===
     const riwayatTahunIni = await prisma.riwayatDonor.findMany({
       where: { tanggal_donor: { gte: startOfYear } },
       select: { tanggal_donor: true },
@@ -27,7 +26,6 @@ export async function GET() {
     });
     const statistikData = namaBulan.map((bulan, i) => ({ bulan, donor: statistikMap[i] }));
 
-    // === Total stok darah per golongan ===
     const stokRaw = await prisma.stokDarah.groupBy({
       by: ["golongan_darah"],
       _sum: { jumlah_kantong: true },
@@ -49,7 +47,6 @@ export async function GET() {
       return { golongan: g, jumlah, status, kritis };
     });
 
-    // === Donor hari ini (dari jadwal yang tanggal pelaksanaannya hari ini) ===
     const jadwalHariIni = await prisma.jadwalDonor.findMany({
       where: {
         tanggal_pelaksanaan: { gte: today, lt: tomorrow },
@@ -63,7 +60,6 @@ export async function GET() {
       jam: `${new Date(j.jam_mulai).getUTCHours()}.00-${new Date(j.jam_selesai).getUTCHours()}.00`,
     }));
 
-    // === Total pendonor hari ini (dari pendaftaran yang jadwalnya hari ini) & 1 bulan terakhir ===
     const totalPendonorHariIni = await prisma.riwayatDonor.count({
       where: {
         tanggal_donor: { gte: today, lt: tomorrow },
@@ -74,7 +70,6 @@ export async function GET() {
       where: { tanggal_donor: { gte: oneMonthAgo } },
     });
 
-    // === Usia pendonor ===
     const semuaPendonor = await prisma.pendonor.findMany({
       select: { tanggal_lahir: true },
     });

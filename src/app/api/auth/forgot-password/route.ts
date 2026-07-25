@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 menit
+    const expiry = new Date(Date.now() + 10 * 60 * 1000); 
 
     await prisma.admin.update({
       where: { email },

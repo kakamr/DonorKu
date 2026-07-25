@@ -24,13 +24,11 @@ export async function middleware(request: NextRequest) {
 
   const isValid = token ? await verifyToken(token) : false;
 
-  // Belum login, coba akses halaman dashboard -> lempar ke login
   if (isProtectedPath && !isValid) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Sudah login, tapi coba akses halaman login/auth lain -> lempar ke dashboard
   if (isAuthPath && isValid) {
     const dashboardUrl = new URL("/dashboard", request.url);
     return NextResponse.redirect(dashboardUrl);

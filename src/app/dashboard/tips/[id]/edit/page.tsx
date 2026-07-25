@@ -35,7 +35,7 @@ export default function EditAturanTipsPage() {
         }
 
         const data = await res.json();
-        console.log("Data diterima:", data); // <-- tambahkan/cek baris ini
+        console.log("Data diterima:", data); 
 
         setForm({
           judul: data.judul ?? "",

@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024; 
     if (file.size > maxSize) {
       return NextResponse.json({ message: "Ukuran file maksimal 5MB" }, { status: 400 });
     }

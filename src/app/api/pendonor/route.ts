@@ -19,10 +19,10 @@ export async function GET() {
     const result = pendonor
       .filter((p) => {
         const riwayatTerakhir = p.riwayat_donor[0];
-        if (!riwayatTerakhir) return true; // belum pernah donor -> tetap masuk daftar
+        if (!riwayatTerakhir) return true; 
         const tanggalDonor = new Date(riwayatTerakhir.tanggal_donor);
         tanggalDonor.setHours(0, 0, 0, 0);
-        return tanggalDonor >= today; // hanya yang jadwalnya hari ini/masa depan
+        return tanggalDonor >= today; 
       })
       .map((p) => {
         const riwayatTerakhir = p.riwayat_donor[0];

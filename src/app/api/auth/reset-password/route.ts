@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       data: {
         password: hashed,
         reset_otp: null,
-        reset_otp_expiry: null, // OTP langsung dihapus setelah dipakai, tidak bisa dipakai ulang
+        reset_otp_expiry: null, 
       },
     });
 

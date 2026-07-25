@@ -26,7 +26,6 @@ type DashboardData = {
   usiaPendonor: UsiaPendonorItem[];
 };
 
-// Mapping gambar tipe darah, karena API tidak menyimpan path gambar
 const golonganImages: Record<string, { black: string; white: string }> = {
   "A+": { black: "/tipe-darah/blood_a+.png", white: "/tipe-darah/blood_a+_wh.png" },
   "A-": { black: "/tipe-darah/blood_a-.png", white: "/tipe-darah/blood_a-_wh.png" },
@@ -81,7 +80,7 @@ export default function DashboardPage() {
       <Sidebar />
 
       <div className="ml-72 flex min-h-screen flex-col">
-        {/* Header */}
+        {}
         <header className="fixed top-0 left-72 right-0 z-50 flex h-20 items-center justify-end border-b-2 border-black bg-white px-10">
           <UserMenu />
         </header>
@@ -95,7 +94,7 @@ export default function DashboardPage() {
           {!loading && data && (
             <>
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
-                {/* Statistik chart */}
+                {}
                 <div className="rounded-2xl border border-gray-200 p-6 shadow-sm xl:col-span-2">
                   <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-lg text-black">Statistik</h2>
@@ -120,7 +119,7 @@ export default function DashboardPage() {
                   </ResponsiveContainer>
                 </div>
 
-                {/* Total stok darah */}
+                {}
                 <div className="rounded-2xl border border-gray-200 p-6 shadow-sm xl:col-span-2">
                   <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-lg text-black">Total Stok Darah Dari Semua Cabang</h2>
@@ -187,7 +186,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-4">
-                {/* Donor hari ini */}
+                {}
                 <div className="rounded-2xl border border-gray-200 p-6 shadow-sm xl:col-span-2">
                   <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-lg text-black">Donor Hari Ini</h2>
@@ -224,7 +223,7 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                {/* Total pendonor */}
+                {}
                 <div className="flex h-full flex-col gap-6">
                   <div
                     className="flex flex-1 flex-col rounded-2xl border border-gray-200 p-6 pt-7 shadow-sm"
@@ -245,7 +244,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Usia pendonor */}
+                {}
                 <div className="rounded-2xl border border-gray-200 p-6 shadow-sm">
                   <h2 className="mb-4 text-lg text-black">Usia Pendonor</h2>
                   <div className="flex flex-col items-center gap-6">

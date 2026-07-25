@@ -32,7 +32,7 @@ export default function TambahLokasiPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id_admin: 1, // TODO: ambil dari session admin yang login
+          id_admin: 1, 
           nama_lokasi: form.nama,
           alamat: form.alamat,
           kota: form.kota,

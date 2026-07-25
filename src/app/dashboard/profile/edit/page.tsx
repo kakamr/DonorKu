@@ -66,7 +66,6 @@ export default function EditProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // preview instan sambil upload berjalan
     const previewUrl = URL.createObjectURL(file);
     setFotoProfil(previewUrl);
     setUploading(true);

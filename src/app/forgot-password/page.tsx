@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SuccessModal from "@/components/SuccessModal";
 import Image from "next/image";
-// di dalam komponen:
 
 
 export default function ForgotPasswordPage() {
@@ -36,14 +35,14 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-stretch border-2 border-black bg-white">
-      {/* Panel kiri: logo */}
+      {}
       <div className="relative hidden w-3/4 items-center justify-center border-r-2 border-black md:flex">
         <div className="flex flex-col items-center gap-2">
           <Image src="/logo/logo_bt_type.png" alt="logo type bottom" width={120} height={120}/>
         </div>
       </div>
 
-      {/* Panel kanan: form lupa password */}
+      {}
       <div className="flex w-full flex-col justify-center px-10 py-16 md:w-1/2 md:px-24">
         <h1 className="mb-6 text-4xl font-extrabold text-black">Lupa Password</h1>
 

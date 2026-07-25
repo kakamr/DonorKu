@@ -15,7 +15,7 @@ export async function GET() {
       .filter((r) => {
         const tanggalDonor = new Date(r.tanggal_donor);
         tanggalDonor.setHours(0, 0, 0, 0);
-        return tanggalDonor < today; // hanya yang sudah lewat
+        return tanggalDonor < today; 
       })
       .map((r) => ({
         id_riwayat: r.id_riwayat,

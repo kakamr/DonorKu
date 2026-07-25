@@ -34,7 +34,6 @@ export default function TambahJadwalPage() {
 
   const handleAddFoto = (items: FotoItem[]) => {
     setFoto((prev) => {
-      // update item yang sudah ada (dari uploading -> selesai), atau tambah baru
       const existingIds = prev.map((f) => f.id);
       const updated = prev.map((f) => {
         const match = items.find((i) => i.id === f.id);
@@ -62,7 +61,7 @@ export default function TambahJadwalPage() {
         body: JSON.stringify({
           ...form,
           id_lokasi: Number(form.id_lokasi),
-          id_admin: 1, // TODO: ambil dari session admin
+          id_admin: 1, 
           foto_lokasi: foto.map((f) => f.url),
         }),
       });

@@ -196,7 +196,7 @@ export default function DaftarLokasiPage() {
             </table>
           </div>
 
-          {/* Pagination */}
+          {}
           <div className="mt-6 flex items-center justify-end gap-2">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
