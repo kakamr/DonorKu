@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Donorku
 
-## Getting Started
+Aplikasi manajemen donor darah berbasis web
+Panel admin untuk mengelola jadwal donor, lokasi donor, data pendonor, riwayat donor, dan stok darah.
 
-First, run the development server:
+## Fitur
+
+- **Autentikasi Admin** — login, lupa password dengan verifikasi OTP, reset password
+- **Dashboard** — statistik donor bulanan, ringkasan stok darah, jadwal donor hari ini, distribusi usia pendonor
+- **Jadwal Donor** — kelola jadwal donor (tambah/edit/hapus), filter berdasarkan tanggal & pencarian lokasi
+- **Lokasi Donor** — kelola lokasi pelaksanaan donor darah
+- **Daftar Pendonor** — data pendonor terdaftar, filter golongan darah & tanggal donor
+- **Riwayat Donor** — riwayat donor yang sudah selesai, filter tanggal, ekspor ke Excel
+- **Stok Darah** — pantau stok darah per golongan dengan indikator status (Aman / Menipis / Kritis)
+- **Aturan & Tips** — kelola konten aturan dan tips seputar donor darah
+- **Profil Admin** — edit profil dan ubah password
+
+## Tech Stack
+
+| Kategori | Teknologi |
+|---|---|
+| Framework | [Next.js](https://nextjs.org) 15 (App Router) + TypeScript |
+| Styling | Tailwind CSS |
+| ORM | [Prisma](https://www.prisma.io) |
+| Database | MySQL / MariaDB |
+| Ikon | [lucide-react](https://lucide.dev) |
+| Chart | [Recharts](https://recharts.org) |
+| Ekspor data | [SheetJS (xlsx)](https://sheetjs.com) |
+
+## Struktur Proyek
+
+```
+src/
+├─ app/
+│  ├─ login/, forgot-password/, reset-password/, verify-email/   # halaman autentikasi
+│  ├─ api/                                                       # REST API routes
+│  │  ├─ jadwal/, lokasi/, pendonor/, riwayat/, stok-darah/, aturan-tips/, auth/, admin/, ...
+│  └─ dashboard/                                                 # halaman-halaman admin (perlu login)
+│     ├─ jadwal/, lokasi/, pendonor/, riwayat/, stok-darah/, tips/, profile/
+├─ components/                                                   # komponen reusable (Sidebar, DatePickerFilter, Pagination, dst)
+└─ lib/                                                          # prisma client, mailer
+prisma/
+└─ schema.prisma                                                 # skema database
+```
+
+## Prasyarat
+
+Sebelum mulai, pastikan sudah terpasang:
+
+- [Node.js](https://nodejs.org) versi 18 ke atas
+- npm (atau yarn/pnpm/bun)
+- Server **MySQL** atau **MariaDB** yang aktif (lokal maupun remote)
+
+## Cara Menjalankan (Development)
+
+### 1. Clone repository
+
+```bash
+git clone <url-repo-anda>
+cd donorku
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Setup environment variables
+
+Salin `.env.example` menjadi `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Lalu isi nilai variabelnya sesuai environment Anda. Contoh isi yang umumnya dibutuhkan proyek ini:
+
+```env
+# Koneksi database (dipakai Prisma)
+DATABASE_URL="mysql://user:password@localhost:3306/donorku"
+
+# Konfigurasi SMTP (untuk kirim OTP lupa password)
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+
+# Secret untuk session/JWT
+JWT_SECRET=
+```
+
+> ⚠️ **Catatan:** daftar variabel di atas adalah perkiraan berdasarkan fitur yang ada (koneksi database, pengiriman OTP via email, autentikasi). Sesuaikan dengan nama variabel yang benar-benar dipakai di `.env` Anda saat ini — kalau perlu, README ini bisa diperbarui lagi supaya persis sama.
+>
+> `.env` **tidak** ikut di-commit ke Git (sudah masuk `.gitignore`) karena berisi kredensial asli. Hanya `.env.example` (template kosong) yang di-commit, supaya siapa pun yang clone proyek ini tahu variabel apa saja yang perlu diisi.
+
+### 4. Setup database
+
+Jalankan migrasi Prisma untuk menyiapkan skema database:
+
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
+
+Atau, kalau ingin memakai data yang sudah ada (import dari dump SQL):
+
+```bash
+mysql -u root -p donorku < donorku.sql
+```
+
+### 5. Jalankan development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000) di browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build untuk Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Belajar Lebih Lanjut
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Dokumentasi Next.js](https://nextjs.org/docs)
+- [Dokumentasi Prisma](https://www.prisma.io/docs)
