@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import DatePickerFilter from "@/components/DatePickerFilter";
 import UserMenu from "@/components/UserMenu";
+import Pagination from "@/components/Pagination";
 import Image from "next/image";
 
 type Pendonor = {
@@ -239,33 +240,11 @@ export default function DaftarPendonorPage() {
             </table>
           </div>
 
-          <div className="mt-6 flex items-center justify-end gap-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-black disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              ‹
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium ${
-                  currentPage === page ? "bg-red-600 text-white" : "border border-gray-200 text-black"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-black disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              ›
-            </button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </main>
       </div>
     </div>

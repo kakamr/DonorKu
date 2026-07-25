@@ -136,19 +136,25 @@ export default function DashboardPage() {
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-3">
                       {data.stokDarah.map((stok) => {
                         const img = golonganImages[stok.golongan];
+                        const isKritis = stok.status === "Stok Kritis";
+                        const isMenipis = stok.status === "Stok Menipis";
+
                         return (
                           <div
                             key={stok.golongan}
                             className={`rounded-xl border p-4 ${
-                              stok.kritis
+                              isKritis
                                 ? "border-red-600 bg-red-600 text-white"
+                                : isMenipis
+                                ? "text-white"
                                 : "border-gray-200 text-black"
                             }`}
+                            style={isMenipis ? { backgroundColor: "#E94545", borderColor: "#E94545" } : undefined}
                           >
                             <div className="flex items-center gap-4">
                               {img && (
                                 <Image
-                                  src={stok.kritis ? img.white : img.black}
+                                  src={isKritis || isMenipis ? img.white : img.black}
                                   alt={stok.golongan}
                                   width={50}
                                   height={50}
@@ -165,7 +171,7 @@ export default function DashboardPage() {
                                 <div className="mt-2 flex items-center gap-1 text-xs">
                                   <span
                                     className={`h-1.5 w-1.5 rounded-full ${
-                                      stok.kritis ? "bg-white" : "bg-black"
+                                      isKritis || isMenipis ? "bg-white" : "bg-black"
                                     }`}
                                   />
                                   {stok.status}
