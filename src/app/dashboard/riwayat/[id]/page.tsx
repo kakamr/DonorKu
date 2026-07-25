@@ -10,6 +10,7 @@ type RiwayatDetail = {
   id_riwayat: number;
   tanggal_donor: string;
   lokasi_donor: string;
+  alamat_lokasi: string | null;
   keterangan: string | null;
   darah_terkumpul: number | null;
   pendonor: {
@@ -171,9 +172,8 @@ export default function DetailRiwayatPage() {
                 </div>
                 <div>
                   <p className="text-black">Alamat Lokasi</p>
-                  <p className="text-lg font-semibold text-black">-</p>
+                  <p className="text-lg font-semibold text-black">{data.alamat_lokasi ?? "-"}</p>
                 </div>
-
                 <div>
                   <p className="text-black">Darah Terkumpul</p>
                   <p className="text-lg font-semibold text-black">

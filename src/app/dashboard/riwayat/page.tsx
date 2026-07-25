@@ -13,12 +13,19 @@ import Image from "next/image";
 type Riwayat = {
   id_riwayat: number;
   nama_lengkap: string;
+  nik: string;
   email: string;
+  no_hp: string;
   golongan_darah: string;
   jenis_kelamin: string;
   umur: number;
+  alamat_pendonor: string;
   tanggal_donor: string;
   lokasi_donor: string;
+  alamat_lokasi: string | null;
+  status_donor: string;
+  darah_terkumpul: number | null;
+  keterangan: string | null;
 };
 
 export default function RiwayatDonorPage() {
@@ -97,13 +104,20 @@ export default function RiwayatDonorPage() {
   const handleExportExcel = () => {
     const exportData = filtered.map((r) => ({
       ID: r.id_riwayat,
+      NIK: r.nik,
       "Nama Lengkap": r.nama_lengkap,
       Email: r.email,
+      "No. HP": r.no_hp,
       "Golongan Darah": r.golongan_darah,
       "Jenis Kelamin": r.jenis_kelamin,
       Umur: r.umur,
+      "Alamat Pendonor": r.alamat_pendonor,
       "Tanggal Pendonoran": formatTanggal(r.tanggal_donor),
       "Lokasi Donor": r.lokasi_donor,
+      "Alamat Lokasi": r.alamat_lokasi ?? "-",
+      "Status Donor": r.status_donor,
+      "Darah Terkumpul (ml)": r.darah_terkumpul ?? "-",
+      Keterangan: r.keterangan ?? "-",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);

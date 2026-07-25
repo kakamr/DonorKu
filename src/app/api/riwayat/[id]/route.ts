@@ -28,7 +28,15 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(riwayat);
+    const lokasi = await prisma.lokasiDonor.findFirst({
+      where: { nama_lokasi: riwayat.lokasi_donor },
+      select: { alamat: true },
+    });
+
+    return NextResponse.json({
+      ...riwayat,
+      alamat_lokasi: lokasi?.alamat ?? null,
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: "Gagal mengambil data" }, { status: 500 });

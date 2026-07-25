@@ -21,7 +21,21 @@ export async function GET(
       return NextResponse.json({ message: "Data tidak ditemukan" }, { status: 404 });
     }
 
-    return NextResponse.json(pendonor);
+    const riwayatTerakhir = pendonor.riwayat_donor[0];
+    let alamatLokasi: string | null = null;
+
+    if (riwayatTerakhir) {
+      const lokasi = await prisma.lokasiDonor.findFirst({
+        where: { nama_lokasi: riwayatTerakhir.lokasi_donor },
+        select: { alamat: true },
+      });
+      alamatLokasi = lokasi?.alamat ?? null;
+    }
+
+    return NextResponse.json({
+      ...pendonor,
+      alamat_lokasi: alamatLokasi,
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: "Gagal mengambil data" }, { status: 500 });

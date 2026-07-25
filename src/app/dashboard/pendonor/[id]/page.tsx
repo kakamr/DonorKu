@@ -15,6 +15,7 @@ type PendonorDetail = {
   tanggal_lahir: string;
   alamat: string;
   foto_profil: string | null;
+  alamat_lokasi: string | null;
   riwayat_donor: {
     tanggal_donor: string;
     lokasi_donor: string;
@@ -169,6 +170,10 @@ export default function DetailPendonorPage() {
                   <p className="text-lg font-semibold text-black">
                     {data.riwayat_donor[0]?.lokasi_donor ?? "-"}
                   </p>
+                </div>
+                <div>
+                  <p className="text-black">Alamat Lokasi</p>
+                  <p className="text-lg font-semibold text-black">{data.alamat_lokasi ?? "-"}</p>
                 </div>
               </div>
             </>
