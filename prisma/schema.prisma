@@ -136,7 +136,7 @@ model StokDarah {
   jumlah_kantong Int          @default(0)
   id_lokasi      Int?
   admin          Admin        @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_stok_admin")
-  lokasi         LokasiDonor? @relation(fields: [id_lokasi], references: [id_lokasi], onDelete: Restrict, onUpdate: Restrict, map: "fk_stok_lokasi")
+  lokasi         LokasiDonor? @relation(fields: [id_lokasi], references: [id_lokasi], onDelete: Cascade, map: "fk_stok_lokasi")
 
   @@index([id_admin], map: "fk_stok_admin")
   @@index([id_lokasi], map: "fk_stok_lokasi")
