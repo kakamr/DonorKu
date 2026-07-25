@@ -90,10 +90,6 @@ SMTP_PASS=
 JWT_SECRET=
 ```
 
-> ⚠️ **Catatan:** daftar variabel di atas adalah perkiraan berdasarkan fitur yang ada (koneksi database, pengiriman OTP via email, autentikasi). Sesuaikan dengan nama variabel yang benar-benar dipakai di `.env` Anda saat ini — kalau perlu, README ini bisa diperbarui lagi supaya persis sama.
->
-> `.env` **tidak** ikut di-commit ke Git (sudah masuk `.gitignore`) karena berisi kredensial asli. Hanya `.env.example` (template kosong) yang di-commit, supaya siapa pun yang clone proyek ini tahu variabel apa saja yang perlu diisi.
-
 ### 4. Setup database
 
 Jalankan migrasi Prisma untuk menyiapkan skema database:
