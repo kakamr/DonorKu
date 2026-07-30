@@ -57,12 +57,25 @@ model Pendonor {
   alamat         String?                @db.Text
   no_hp          String?                @db.VarChar(20)
   email          String                 @unique(map: "email") @db.VarChar(100)
-  password       String                 @db.VarChar(255)
+  password       String?                 @db.VarChar(255)
   foto_profil    String?                @db.VarChar(255)
   golongan_darah String                 @default("O+") @db.VarChar(3)
   pendaftaran    Pendaftaran[]
   admin          Admin                  @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_pendonor_admin")
   riwayat_donor  RiwayatDonor[]
+  kota                String?   @db.VarChar(100)
+  profesi             String?   @db.VarChar(100)
+  foto_ktp            String?   @db.VarChar(255)
+  reset_otp           String?   @db.VarChar(6)
+  reset_otp_expiry    DateTime?
+  is_deleted          Boolean   @default(false)
+  deleted_at          DateTime?
+  fcm_token           String?   @db.VarChar(255)
+  notifikasi Notifikasi[]
+  feedback    Feedback[]
+  pengaturan  PengaturanPendonor?
+  google_id   String? @unique @db.VarChar(100)
+  facebook_id String? @unique @db.VarChar(100)
 
   @@index([id_admin], map: "fk_pendonor_admin")
   @@map("pendonor")
@@ -104,6 +117,8 @@ model Pendaftaran {
   admin              Admin                          @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_pendaftaran_admin")
   jadwal             JadwalDonor                    @relation(fields: [id_jadwal], references: [id_jadwal], onDelete: Cascade, map: "fk_pendaftaran_jadwal")
   pendonor           Pendonor                       @relation(fields: [id_pendonor], references: [id_pendonor], onDelete: Cascade, map: "fk_pendaftaran_pendonor")
+  kuesioner  KuesionerKesehatan?
+  feedback  Feedback[]
 
   @@index([id_admin], map: "fk_pendaftaran_admin")
   @@index([id_jadwal], map: "fk_pendaftaran_jadwal")
@@ -122,6 +137,11 @@ model RiwayatDonor {
   darah_terkumpul Int?
   admin           Admin                      @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_riwayat_admin")
   pendonor        Pendonor                   @relation(fields: [id_pendonor], references: [id_pendonor], onDelete: Cascade, map: "fk_riwayat_pendonor")
+  hemoglobin              Decimal?  @db.Decimal(4, 1)
+  tekanan_darah_sistole   Int?
+  tekanan_darah_diastole  Int?
+  status_skrining         riwayat_donor_status_skrining?
+  sertifikat SertifikatDonor?
 
   @@index([id_admin], map: "fk_riwayat_admin")
   @@index([id_pendonor], map: "fk_riwayat_pendonor")
@@ -158,6 +178,96 @@ model AturanDanTips {
   @@map("aturan_dan_tips")
 }
 
+model KuesionerKesehatan {
+  id_kuesioner              Int      @id @default(autoincrement())
+  id_pendaftaran            Int      @unique
+  demam_flu_batuk           Boolean
+  sehat_hari_ini            Boolean
+  pernah_dirawat            Boolean
+  sudah_makan               Boolean
+  konsumsi_alkohol          Boolean
+  konsumsi_obat             Boolean
+  pernah_pingsan_donor      Boolean
+  riwayat_jantung_diabetes  Boolean
+  riwayat_hepatitis_hiv     Boolean
+  hamil_menyusui            Boolean
+  baru_operasi              Boolean
+  baru_vaksin               Boolean
+  bersedia_sukarela         Boolean
+  layak_donor               Boolean  @default(true)
+  catatan_kelayakan         String?  @db.Text
+  created_at                DateTime @default(now())
+
+  pendaftaran               Pendaftaran @relation(fields: [id_pendaftaran], references: [id_pendaftaran], onDelete: Cascade)
+
+  @@map("kuesioner_kesehatan")
+}
+
+model Notifikasi {
+  id_notifikasi Int             @id @default(autoincrement())
+  id_pendonor   Int
+  tipe          notifikasi_tipe
+  judul         String          @db.VarChar(150)
+  pesan         String          @db.Text
+  is_read       Boolean         @default(false)
+  created_at    DateTime        @default(now())
+
+  pendonor      Pendonor @relation(fields: [id_pendonor], references: [id_pendonor], onDelete: Cascade)
+
+  @@map("notifikasi")
+  @@index([id_pendonor])
+}
+
+model Feedback {
+  id_feedback     Int      @id @default(autoincrement())
+  id_pendonor     Int
+  id_pendaftaran  Int?
+  rating          Int
+  saran_keluhan   String?  @db.Text
+  created_at      DateTime @default(now())
+
+  pendonor        Pendonor     @relation(fields: [id_pendonor], references: [id_pendonor], onDelete: Cascade)
+  pendaftaran     Pendaftaran? @relation(fields: [id_pendaftaran], references: [id_pendaftaran], onDelete: SetNull)
+
+  @@map("feedback")
+}
+
+model EdukasiDonor {
+  id_edukasi Int                     @id @default(autoincrement())
+  kategori   edukasi_donor_kategori
+  icon       String                  @db.VarChar(50)
+  judul      String                  @db.VarChar(150)
+  deskripsi  String                  @db.Text
+  urutan     Int                     @default(0)
+
+  @@map("edukasi_donor")
+}
+
+model PengaturanPendonor {
+  id_pendonor Int      @id
+  notif_push  Boolean  @default(true)
+  notif_email Boolean  @default(false)
+  notif_sms   Boolean  @default(true)
+  bahasa      String   @default("id") @db.VarChar(5)
+  tema        String   @default("light") @db.VarChar(10)
+
+  pendonor    Pendonor @relation(fields: [id_pendonor], references: [id_pendonor], onDelete: Cascade)
+
+  @@map("pengaturan_pendonor")
+}
+
+model SertifikatDonor {
+  id_sertifikat    Int      @id @default(autoincrement())
+  id_riwayat       Int      @unique
+  nomor_sertifikat String   @unique @db.VarChar(50)
+  file_path        String   @db.VarChar(255)
+  tanggal_terbit   DateTime @default(now())
+
+  riwayat          RiwayatDonor @relation(fields: [id_riwayat], references: [id_riwayat], onDelete: Cascade)
+
+  @@map("sertifikat_donor")
+}
+
 enum jadwal_donor_status_jadwal {
   aktif
   nonaktif
@@ -185,4 +295,21 @@ enum pendaftaran_status_pendaftaran {
   diterima
   ditolak
   batal
+}
+
+enum riwayat_donor_status_skrining {
+  negatif
+  positif
+  pending
+}
+
+enum notifikasi_tipe {
+  info
+  success
+  warning
+}
+
+enum edukasi_donor_kategori {
+  edukasi
+  manfaat
 }
