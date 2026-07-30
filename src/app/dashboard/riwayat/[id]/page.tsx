@@ -33,7 +33,7 @@ export default function DetailRiwayatPage() {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/riwayat/${params.id}`);
+        const res = await fetch(`/api/web/riwayat/${params.id}`);
         if (!res.ok) {
           setData(null);
           return;

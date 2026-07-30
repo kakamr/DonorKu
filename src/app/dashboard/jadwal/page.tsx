@@ -39,7 +39,7 @@ export default function JadwalDonorPage() {
   const fetchJadwal = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/jadwal");
+      const res = await fetch("/api/web/jadwal");
       const data = await res.json();
       setDataJadwal(data);
     } catch (error) {
@@ -52,7 +52,7 @@ export default function JadwalDonorPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await fetch(`/api/jadwal/${deleteTarget}`, { method: "DELETE" });
+      await fetch(`/api/web/jadwal/${deleteTarget}`, { method: "DELETE" });
       setDataJadwal((prev) => prev.filter((j) => j.id_jadwal !== deleteTarget));
     } catch (error) {
       console.error(error);

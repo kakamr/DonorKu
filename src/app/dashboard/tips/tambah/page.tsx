@@ -23,7 +23,7 @@ export default function TambahAturanTipsPage() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch("/api/aturan-tips", {
+      const res = await fetch("/api/web/aturan-tips", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

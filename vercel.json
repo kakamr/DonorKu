@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/notifikasi-jadwal",
+      "path": "/api/web/cron/notifikasi-jadwal",
       "schedule": "0 0 * * *"
     }
   ]

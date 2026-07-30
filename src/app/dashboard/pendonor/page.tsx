@@ -56,7 +56,7 @@ export default function DaftarPendonorPage() {
   const fetchPendonor = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/pendonor");
+      const res = await fetch("/api/web/pendonor");
       const data = await res.json();
       setDataPendonor(data);
     } catch (error) {

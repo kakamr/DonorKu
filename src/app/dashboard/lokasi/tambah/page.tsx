@@ -28,7 +28,7 @@ export default function TambahLokasiPage() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch("/api/lokasi", {
+      const res = await fetch("/api/web/lokasi", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

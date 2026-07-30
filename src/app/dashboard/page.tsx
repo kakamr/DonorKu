@@ -53,7 +53,7 @@ export default function DashboardPage() {
 
   const fetchAdminNama = async () => {
     try {
-      const res = await fetch("/api/admin/me");
+      const res = await fetch("/api/web/admin/me");
       if (!res.ok) return;
       const data = await res.json();
       setAdminNama(data.nama_admin ?? "");
@@ -65,7 +65,7 @@ export default function DashboardPage() {
   const fetchDashboard = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/dashboard");
+      const res = await fetch("/api/web/dashboard");
       const result = await res.json();
       setData(result);
     } catch (error) {

@@ -68,7 +68,7 @@ export default function StokDarahPage() {
   const fetchStok = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/stok-darah");
+      const res = await fetch("/api/web/stok-darah");
       const data = await res.json();
       setDataStok(data);
     } catch (error) {

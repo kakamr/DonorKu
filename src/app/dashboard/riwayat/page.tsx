@@ -48,7 +48,7 @@ export default function RiwayatDonorPage() {
   const fetchRiwayat = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/riwayat");
+      const res = await fetch("/api/web/riwayat");
       const data = await res.json();
       setDataRiwayat(data);
     } catch (error) {
@@ -61,7 +61,7 @@ export default function RiwayatDonorPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await fetch(`/api/riwayat/${deleteTarget}`, { method: "DELETE" });
+      await fetch(`/api/web/riwayat/${deleteTarget}`, { method: "DELETE" });
       setDataRiwayat((prev) => prev.filter((r) => r.id_riwayat !== deleteTarget));
     } catch (error) {
       console.error(error);

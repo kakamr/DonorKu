@@ -26,7 +26,7 @@ export default function DetailLokasiPage() {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/lokasi/${params.id}`);
+        const res = await fetch(`/api/web/lokasi/${params.id}`);
         if (!res.ok) {
           setLokasi(null);
           return;

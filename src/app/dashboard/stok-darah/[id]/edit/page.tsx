@@ -33,7 +33,7 @@ export default function EditStokDarahPage() {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/stok-darah/${params.id}`);
+        const res = await fetch(`/api/web/stok-darah/${params.id}`);
         if (!res.ok) return;
         const data = await res.json();
         setForm({
@@ -55,7 +55,7 @@ export default function EditStokDarahPage() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(`/api/stok-darah/${params.id}`, {
+      const res = await fetch(`/api/web/stok-darah/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

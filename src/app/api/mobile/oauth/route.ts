@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Belum terdaftar sama sekali -> kembalikan profil terverifikasi supaya
-    // app lanjut ke step KTP + foto diri, lalu panggil /api/mobile/auth/register
+    // app lanjut ke step KTP + foto diri, lalu panggil /api/web/mobile/auth/register
     return NextResponse.json({
       status: "perlu_registrasi",
       provider,

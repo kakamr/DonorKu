@@ -28,7 +28,7 @@ export default function UserMenu() {
 
   const fetchAdmin = async () => {
     try {
-      const res = await fetch("/api/admin/me");
+      const res = await fetch("/api/web/admin/me");
       if (!res.ok) return;
       const data = await res.json();
       const firstName = data.nama_admin?.split(" ").pop() ?? data.nama_admin;
@@ -41,7 +41,7 @@ export default function UserMenu() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/web/auth/logout", { method: "POST" });
     } catch (error) {
       console.error(error);
     } finally {

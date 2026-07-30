@@ -36,7 +36,7 @@ export default function DaftarLokasiPage() {
   const fetchLokasi = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/lokasi");
+      const res = await fetch("/api/web/lokasi");
       const data = await res.json();
       setDataLokasi(data);
     } catch (error) {
@@ -49,7 +49,7 @@ export default function DaftarLokasiPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await fetch(`/api/lokasi/${deleteTarget}`, { method: "DELETE" });
+      await fetch(`/api/web/lokasi/${deleteTarget}`, { method: "DELETE" });
       setDataLokasi((prev) => prev.filter((l) => l.id_lokasi !== deleteTarget));
     } catch (error) {
       console.error(error);

@@ -55,7 +55,7 @@ export default function TambahJadwalPage() {
     }
 
     try {
-      const res = await fetch("/api/jadwal", {
+      const res = await fetch("/api/web/jadwal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -34,7 +34,7 @@ export default function EditJadwalPage() {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/jadwal/${params.id}`);
+        const res = await fetch(`/api/web/jadwal/${params.id}`);
         if (!res.ok) return;
         const data = await res.json();
 
@@ -95,7 +95,7 @@ export default function EditJadwalPage() {
     }
 
     try {
-      const res = await fetch(`/api/jadwal/${params.id}`, {
+      const res = await fetch(`/api/web/jadwal/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

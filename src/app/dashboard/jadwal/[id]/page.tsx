@@ -32,7 +32,7 @@ export default function DetailJadwalPage() {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/jadwal/${params.id}`);
+        const res = await fetch(`/api/web/jadwal/${params.id}`);
         if (!res.ok) {
           setData(null);
           return;

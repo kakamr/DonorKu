@@ -26,7 +26,7 @@ export default function ProfilePage() {
   const fetchAdmin = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/me");
+      const res = await fetch("/api/web/admin/me");
       if (!res.ok) return;
       const data = await res.json();
       setAdmin(data);

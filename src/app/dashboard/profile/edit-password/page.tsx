@@ -28,7 +28,7 @@ export default function EditPasswordPage() {
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
-        const res = await fetch("/api/admin/me");
+        const res = await fetch("/api/web/admin/me");
         if (!res.ok) return;
         const data = await res.json();
         setAdmin(data);
@@ -47,7 +47,7 @@ export default function EditPasswordPage() {
     }
 
     try {
-      const res = await fetch("/api/admin/password", {
+      const res = await fetch("/api/web/admin/password", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

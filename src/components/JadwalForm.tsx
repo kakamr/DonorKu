@@ -63,7 +63,7 @@ export default function JadwalForm({
   const fetchLokasi = async () => {
     setLoadingLokasi(true);
     try {
-      const res = await fetch("/api/lokasi");
+      const res = await fetch("/api/web/lokasi");
       const data = await res.json();
       setLokasiList(data);
     } catch (error) {
@@ -97,7 +97,7 @@ export default function JadwalForm({
       formData.append("folder", "lokasi");
 
       try {
-        const res = await fetch("/api/upload", {
+        const res = await fetch("/api/web/upload", {
           method: "POST",
           body: formData,
         });

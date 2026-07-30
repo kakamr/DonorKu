@@ -24,7 +24,7 @@ export default function EditAturanTipsPage() {
       setLoading(true);
       console.log("Fetching ID:", params.id);
       try {
-        const res = await fetch(`/api/aturan-tips/${params.id}`);
+        const res = await fetch(`/api/web/aturan-tips/${params.id}`);
         console.log("Response status:", res.status);
 
         if (!res.ok) {
@@ -61,7 +61,7 @@ export default function EditAturanTipsPage() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(`/api/aturan-tips/${params.id}`, {
+      const res = await fetch(`/api/web/aturan-tips/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

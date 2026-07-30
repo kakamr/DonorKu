@@ -32,7 +32,7 @@ export default function DetailPendonorPage() {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/pendonor/${params.id}`);
+        const res = await fetch(`/api/web/pendonor/${params.id}`);
         if (!res.ok) {
           setData(null);
           return;

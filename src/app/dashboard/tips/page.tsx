@@ -31,7 +31,7 @@ export default function AturanTipsPage() {
   const fetchTips = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/aturan-tips");
+      const res = await fetch("/api/web/aturan-tips");
       const data = await res.json();
       setDataTips(data);
     } catch (error) {
@@ -44,7 +44,7 @@ export default function AturanTipsPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await fetch(`/api/aturan-tips/${deleteTarget}`, { method: "DELETE" });
+      await fetch(`/api/web/aturan-tips/${deleteTarget}`, { method: "DELETE" });
       setDataTips((prev) => prev.filter((t) => t.id_tips !== deleteTarget));
       setDeleteTarget(null);
       setShowSuccess(true);

@@ -14,7 +14,7 @@ export default function IdleLogoutHandler() {
 
   const handleLogout = useCallback(async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/web/auth/logout", { method: "POST" });
     } catch (error) {
       console.error(error);
     } finally {

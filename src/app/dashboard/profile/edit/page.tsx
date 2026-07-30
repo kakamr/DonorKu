@@ -37,7 +37,7 @@ export default function EditProfilePage() {
   const fetchAdmin = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/me");
+      const res = await fetch("/api/web/admin/me");
       if (!res.ok) return;
       const data = await res.json();
       setForm({
@@ -75,7 +75,7 @@ export default function EditProfilePage() {
     formData.append("folder", "profile");
 
     try {
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/web/upload", {
         method: "POST",
         body: formData,
       });
@@ -99,7 +99,7 @@ export default function EditProfilePage() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch("/api/admin/me", {
+      const res = await fetch("/api/web/admin/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

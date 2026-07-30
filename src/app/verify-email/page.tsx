@@ -50,7 +50,7 @@ export default function VerifyEmailPage() {
   const handleVerify = async () => {
     const fullCode = code.join("");
 
-    const res = await fetch("/api/auth/verify-otp", {
+    const res = await fetch("/api/web/auth/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, otp: fullCode }),
@@ -70,7 +70,7 @@ export default function VerifyEmailPage() {
 
   const handleResend = async () => {
     try {
-      const res = await fetch("/api/auth/forgot-password", {
+      const res = await fetch("/api/web/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
