@@ -1,18 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import SuccessModal from "@/components/SuccessModal";
 import Image from "next/image";
 
-export default function LoginPage() {
+function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error) {
+      setErrorMessage(
+        error === "google_gagal" || error === "facebook_gagal"
+          ? "Gagal login, silakan coba lagi"
+          : error
+      );
+      setShowError(true);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,14 +50,14 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-stretch border-2 border-black bg-white">
       {}
-      <div className="relative hidden w-3/4 items-center justify-center border-r-2 border-black md:flex">
+      <div className="relative hidden w-4/5 items-center justify-center border-r-2 border-black md:flex">
         <div className="flex flex-col items-center gap-2">
           <Image src="/logo/logo_bt_type.png" alt="logo type bottom" width={120} height={120}/>
         </div>
       </div>
 
       {}
-      <div className="flex w-full flex-col justify-center px-10 py-16 md:w-1/2 md:px-24">
+      <div className="flex w-full flex-col justify-start px-10 pt-32 pb-16 md:w-1/2 md:px-24">
         <h1 className="mb-10 text-4xl font-extrabold text-black">Login</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -55,6 +68,7 @@ export default function LoginPage() {
             <input
               id="email"
               type="email"
+              required
               placeholder="Masukan email mu"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -70,6 +84,7 @@ export default function LoginPage() {
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                required
                 placeholder="Masukan password mu"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -108,21 +123,21 @@ export default function LoginPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <button
-            type="button"
+          <a
+            href="/api/web/auth/google"
             className="flex items-center justify-center gap-3 rounded-full border border-gray-200 py-3.5 shadow-sm hover:bg-gray-50"
           >
             <Image src="/acc-login/google.png" alt="icon google" width={22} height={22}/>
             <span className="text-base text-black">Masuk dengan Google</span>
-          </button>
+          </a>
 
-          <button
-            type="button"
+          <a
+            href="/api/web/auth/facebook"
             className="flex items-center justify-center gap-3 rounded-full border border-gray-200 py-3.5 shadow-sm hover:bg-gray-50"
           >
             <Image src="/acc-login/facebook.png" alt="icon facebook" width={22} height={22}/>
             <span className="text-base text-black">Masuk dengan Facebook</span>
-          </button>
+          </a>
         </div>
       </div>
       <SuccessModal
@@ -134,5 +149,13 @@ export default function LoginPage() {
         onClose={() => setShowError(false)}
       />
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

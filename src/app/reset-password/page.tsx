@@ -14,6 +14,7 @@ export default function ResetPasswordPage() {
   const router = useRouter();
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,20 +49,20 @@ export default function ResetPasswordPage() {
 
     sessionStorage.removeItem("reset_email");
     sessionStorage.removeItem("reset_otp");
-    router.push("/login");
+    setShowSuccess(true);
   };
 
   return (
     <div className="flex min-h-screen items-stretch border-2 border-black bg-white">
       {}
-      <div className="relative hidden w-3/4 items-center justify-center border-r-2 border-black md:flex">
+      <div className="relative hidden w-4/5 items-center justify-center border-r-2 border-black md:flex">
         <div className="flex flex-col items-center gap-2">
           <Image src="/logo/logo_bt_type.png" alt="logo type bottom" width={120} height={120}/>
         </div>
       </div>
 
       {}
-      <div className="flex w-full flex-col justify-center px-10 py-16 md:w-1/2 md:px-24">
+      <div className="flex w-full flex-col justify-start px-10 pt-32 pb-16 md:w-1/2 md:px-24">
         <h1 className="mb-10 text-4xl font-extrabold text-black">Atur Password Baru</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -128,6 +129,14 @@ export default function ResetPasswordPage() {
         description={errorMessage}
         buttonLabel="Coba Lagi"
         onClose={() => setShowError(false)}
+      />
+      <SuccessModal
+        isOpen={showSuccess}
+        variant="success"
+        title="Password Berhasil Diganti"
+        description="Anda telah berhasil mengganti password baru. Silahkan coba login kembali"
+        buttonLabel="Kembali"
+        onClose={() => router.push("/login")}
       />
     </div>
   );

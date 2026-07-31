@@ -94,14 +94,14 @@ export default function VerifyEmailPage() {
   return (
     <div className="flex min-h-screen items-stretch border-2 border-black bg-white">
       {}
-      <div className="relative hidden w-3/4 items-center justify-center border-r-2 border-black md:flex">
+      <div className="relative hidden w-4/5 items-center justify-center border-r-2 border-black md:flex">
         <div className="flex flex-col items-center gap-2">
           <Image src="/logo/logo_bt_type.png" alt="logo type bottom" width={120} height={120}/>
         </div>
       </div>
 
       {}
-      <div className="flex w-full flex-col justify-center px-10 py-16 md:w-1/2 md:px-24">
+      <div className="flex w-full flex-col justify-start px-10 pt-32 pb-16 md:w-1/2 md:px-24">
         <h1 className="mb-4 text-4xl font-extrabold text-black">Verifikasi Email</h1>
 
         <p className="mb-8 text-base text-gray-500">
