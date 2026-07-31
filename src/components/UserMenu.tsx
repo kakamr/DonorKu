@@ -60,7 +60,7 @@ export default function UserMenu() {
           {fotoProfil && <Image src={fotoProfil} alt="Foto profil" className="h-full w-full object-cover" width={50} height={50}/>}
         </div>
         <span className="text-black">Hi, {nama || "..."}</span>
-        <ChevronDown size={16} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown size={16} className={`text-black transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen && (
