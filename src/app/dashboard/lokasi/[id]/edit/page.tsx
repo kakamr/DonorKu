@@ -77,7 +77,7 @@ export default function EditLokasiPage() {
     formData.append("folder", "lokasi");
 
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const res = await fetch("/api/web/upload", { method: "POST", body: formData });
       const data = await res.json();
 
       if (!res.ok) {

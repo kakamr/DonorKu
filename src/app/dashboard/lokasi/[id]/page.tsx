@@ -83,7 +83,7 @@ export default function DetailLokasiPage() {
           {!loading && lokasi && (
             <>
               <div className="flex flex-col gap-8 md:flex-row">
-                <div className="relative h-56 w-56 flex-shrink-0 overflow-hidden rounded-xl bg-gray-300">
+                <div className="relative h-75 w-75 flex-shrink-0 overflow-hidden rounded-xl bg-gray-300">
                   {lokasi.foto_lokasi ? (
                     <Image src={lokasi.foto_lokasi} alt={lokasi.nama_lokasi} className="object-cover" fill />
                   ) : null}

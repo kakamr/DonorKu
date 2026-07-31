@@ -109,7 +109,7 @@ export default function DetailRiwayatPage() {
           {!loading && data && (
             <>
               <div className="flex flex-col gap-8 md:flex-row">
-                <div className="h-56 w-56 flex-shrink-0 rounded-xl bg-gray-300" />
+                <div className="h-75 w-75 flex-shrink-0 rounded-xl bg-gray-300" />
 
                 <div className="flex-1">
                   <h2 className="mb-4 text-xl font-bold text-black">Detail Pendonor</h2>
