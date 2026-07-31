@@ -14,6 +14,7 @@ type Lokasi = {
   no_hp: string | null;
   longitude: number | null;
   latitude: number | null;
+  foto_lokasi: string | null;
 };
 
 export default function DetailLokasiPage() {
@@ -21,6 +22,7 @@ export default function DetailLokasiPage() {
   const params = useParams();
   const [lokasi, setLokasi] = useState<Lokasi | null>(null);
   const [loading, setLoading] = useState(true);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -42,8 +44,6 @@ export default function DetailLokasiPage() {
     fetchDetail();
   }, [params.id]);
 
-  
-
   return (
     <div className="min-h-screen bg-white">
       <Sidebar />
@@ -55,7 +55,10 @@ export default function DetailLokasiPage() {
 
         <main className="flex-1 px-10 pt-28 pb-8">
           <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-5xl font-extrabold text-black">Lihat Detail Lokasi</h1>
+            <div>
+              <h1 className="text-5xl font-extrabold text-black">Detail Lokasi</h1>
+              <p className="mt-2 text-3xl font-extrabold text-black">ID {params.id}</p>
+            </div>
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -75,64 +78,76 @@ export default function DetailLokasiPage() {
           </div>
 
           {loading && <p className="text-gray-400">Memuat data...</p>}
-
-          {!loading && !lokasi && (
-            <p className="text-gray-400">Data tidak ditemukan</p>
-          )}
+          {!loading && !lokasi && <p className="text-gray-400">Data tidak ditemukan</p>}
 
           {!loading && lokasi && (
             <>
-              <p className="mb-6 text-2xl font-semibold text-black">{lokasi.id_lokasi}</p>
+              <div className="flex flex-col gap-8 md:flex-row">
+                <div className="relative h-56 w-56 flex-shrink-0 overflow-hidden rounded-xl bg-gray-300">
+                  {lokasi.foto_lokasi ? (
+                    <Image src={lokasi.foto_lokasi} alt={lokasi.nama_lokasi} className="object-cover" fill />
+                  ) : null}
 
-              <h2 className="mb-4 text-xl font-bold text-black">Detail Lokasi</h2>
+                  {lokasi.foto_lokasi && (
+                    <button
+                      type="button"
+                      onClick={() => setPreviewImage(lokasi.foto_lokasi)}
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white/90"
+                    >
+                      <Image src="/button/view.png" alt="lihat gambar" width={20} height={20}/>
+                    </button>
+                  )}
+                </div>
 
-              <div className="rounded-2xl border border-gray-200 p-8 shadow-sm">
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                  <div>
-                    <p className="mb-2 text-black">Lokasi Donor</p>
-                    <div className="rounded-xl bg-gray-100 px-5 py-3 text-black">
-                      {lokasi.nama_lokasi}
+                <div className="flex-1">
+                  <h2 className="mb-4 text-xl font-bold text-black">Detail Lokasi</h2>
+                  <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-3">
+                    <div>
+                      <p className="text-black">Lokasi Donor</p>
+                      <p className="text-lg font-semibold text-black">{lokasi.nama_lokasi}</p>
                     </div>
-                  </div>
-                  <div>
-                    <p className="mb-2 text-black">Kota</p>
-                    <div className="rounded-xl bg-gray-100 px-5 py-3 text-black">
-                      {lokasi.kota}
+                    <div>
+                      <p className="text-black">No Petugas</p>
+                      <p className="text-lg font-semibold text-black">{lokasi.no_hp ?? "-"}</p>
                     </div>
-                  </div>
-                  <div>
-                    <p className="mb-2 text-black">No Petugas</p>
-                    <div className="rounded-xl bg-gray-100 px-5 py-3 text-black">
-                      {lokasi.no_hp}
+                    <div>
+                      <p className="text-black">Kota</p>
+                      <p className="text-lg font-semibold text-black">{lokasi.kota}</p>
                     </div>
-                  </div>
 
-                  <div>
-                    <p className="mb-2 text-black">
-                      Alamat Lokasi<span className="text-red-500">*</span>
-                    </p>
-                    <div className="min-h-[110px] rounded-xl bg-gray-100 px-5 py-3 text-black">
-                      {lokasi.alamat}
+                    <div className="sm:col-span-3">
+                      <p className="text-black">
+                        Alamat Lokasi<span className="text-red-500">*</span>
+                      </p>
+                      <p className="text-lg font-semibold text-black">{lokasi.alamat}</p>
                     </div>
-                  </div>
-                  <div>
-                    <p className="mb-2 text-black">Longitude</p>
-                    <div className="rounded-xl bg-gray-100 px-5 py-3 text-black">
-                      {lokasi.longitude}
+
+                    <div>
+                      <p className="text-black">Longitude</p>
+                      <p className="text-lg font-semibold text-black">{lokasi.longitude ?? "-"}</p>
                     </div>
-                  </div>
-                  <div>
-                    <p className="mb-2 text-black">Latitude</p>
-                    <div className="rounded-xl bg-gray-100 px-5 py-3 text-black">
-                      {lokasi.latitude}
+                    <div>
+                      <p className="text-black">Latitude</p>
+                      <p className="text-lg font-semibold text-black">{lokasi.latitude ?? "-"}</p>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <hr className="mt-8 border-gray-300" />
             </>
           )}
         </main>
       </div>
+
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-8"
+          onClick={() => setPreviewImage(null)}
+        >
+          <Image src={previewImage} alt="Preview" className="rounded-xl object-contain" fill />
+        </div>
+      )}
     </div>
   );
 }

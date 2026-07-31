@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
           no_hp: body.no_hp,
           longitude: parseFloat(body.longitude),
           latitude: parseFloat(body.latitude),
+          foto_lokasi: body.foto_lokasi ?? null,
         },
       });
 

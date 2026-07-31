@@ -36,6 +36,7 @@ export async function PUT(
         no_hp: body.no_hp,
         longitude: parseFloat(body.longitude),
         latitude: parseFloat(body.latitude),
+        foto_lokasi: body.foto_lokasi ?? null,
       },
     });
     return NextResponse.json(lokasi);

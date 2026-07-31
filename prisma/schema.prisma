@@ -39,6 +39,7 @@ model LokasiDonor {
   no_hp        String?       @db.VarChar(20)
   longitude    Decimal?      @db.Decimal(10, 7)
   latitude     Decimal?      @db.Decimal(10, 7)
+  foto_lokasi  String?       @db.VarChar(255)
   jadwal_donor JadwalDonor[]
   admin        Admin         @relation(fields: [id_admin], references: [id_admin], onDelete: Cascade, map: "fk_lokasi_admin")
   stok_darah   StokDarah[]
