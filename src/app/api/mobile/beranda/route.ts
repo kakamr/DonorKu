@@ -3,6 +3,21 @@ import { prisma } from "@/lib/prisma";
 import { getMobileTokenPayload } from "@/lib/mobileAuth";
 import { cekJarakDonorTerakhir } from "@/lib/donorEligibility";
 
+/**
+ * Bikin objek Date jam "sekarang", tapi pakai tanggal referensi 1970-01-01
+ * (sama seperti cara Prisma menyimpan kolom bertipe Time), supaya bisa
+ * dibandingkan langsung dengan kolom jam_selesai.
+ *
+ * PENTING: kalau setelah dites ternyata perbandingan jam_selesai masih
+ * tidak akurat, kemungkinan besar penyebabnya di sini -- coba log
+ * `jamSekarang` dan bandingkan manual sama nilai jam_selesai di database
+ * buat mastiin formatnya cocok.
+ */
+function jamSekarangUntukKolomTime(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(1970, 0, 1, now.getHours(), now.getMinutes(), now.getSeconds()));
+}
+
 export async function GET(req: NextRequest) {
   const payload = getMobileTokenPayload(req);
   if (!payload) {
@@ -25,67 +40,36 @@ export async function GET(req: NextRequest) {
     const kelayakan = await cekJarakDonorTerakhir(pendonor.id_pendonor, pendonor.jenis_kelamin);
 
     // --- Filter lokasi: cuma yang masih punya jadwal aktif (belum lewat) ---
-    //
-    // CATATAN PENTING: filter tanggal (>= hari ini) AMAN dilakukan di
-    // query Prisma karena tanggal_pelaksanaan itu kolom Date murni.
-    // TAPI filter jam (jam_selesai) SENGAJA TIDAK dilakukan di query --
-    // pembandingan Time vs DateTime lewat Prisma/driver MySQL terbukti
-    // tidak reliable (selalu true meski sudah lewat). Jadi kita ambil
-    // dulu semua kandidat yang tanggalnya >= hari ini, lalu filter jam
-    // secara manual di JavaScript, yang jauh lebih bisa diandalkan.
     const hariIni = new Date(new Date().toDateString()); // jam 00:00 hari ini
-    const sekarang = new Date();
-    const menitSekarang = sekarang.getHours() * 60 + sekarang.getMinutes();
+    const jamSekarang = jamSekarangUntukKolomTime();
 
-    const kandidatLokasi = await prisma.lokasiDonor.findMany({
+    const lokasi = await prisma.lokasiDonor.findMany({
       where: {
         jadwal_donor: {
           some: {
             status_jadwal: "aktif",
-            tanggal_pelaksanaan: { gte: hariIni }, // cuma filter TANGGAL di query
+            OR: [
+              // Jadwal di hari SETELAH hari ini -> otomatis masih berlaku
+              { tanggal_pelaksanaan: { gt: hariIni } },
+              // Jadwal HARI INI -> jam_selesai-nya belum lewat jam sekarang
+              {
+                tanggal_pelaksanaan: hariIni,
+                jam_selesai: { gt: jamSekarang },
+              },
+            ],
           },
         },
       },
+      take: 5,
       select: {
         id_lokasi: true,
         nama_lokasi: true,
         alamat: true,
         latitude: true,
         longitude: true,
-        jadwal_donor: {
-          where: { status_jadwal: "aktif", tanggal_pelaksanaan: { gte: hariIni } },
-          select: { tanggal_pelaksanaan: true, jam_selesai: true },
-        },
+        foto_lokasi: true,
       },
     });
-
-    // Filter manual: lokasi ikut ditampilkan kalau ADA MINIMAL 1 jadwal
-    // yang beneran belum lewat (tanggal lebih besar dari hari ini, ATAU
-    // tanggal sama dengan hari ini tapi jam_selesai belum lewat jam sekarang).
-    const lokasi = kandidatLokasi
-      .filter((l) =>
-        l.jadwal_donor.some((j) => {
-          if (!j.tanggal_pelaksanaan) return false;
-          const tglJadwal = new Date(j.tanggal_pelaksanaan.toDateString());
-
-          if (tglJadwal.getTime() > hariIni.getTime()) return true; // hari berikutnya, pasti masih berlaku
-
-          // Tanggalnya persis hari ini -> cek jam_selesai
-          // .getUTCHours()/.getUTCMinutes() dipakai (bukan getHours() biasa)
-          // supaya tidak kepengaruh timezone server, ambil jam mentah
-          // apa adanya dari kolom Time.
-          const menitSelesai = j.jam_selesai.getUTCHours() * 60 + j.jam_selesai.getUTCMinutes();
-          return menitSelesai > menitSekarang;
-        })
-      )
-      .slice(0, 5)
-      .map(({ id_lokasi, nama_lokasi, alamat, latitude, longitude }) => ({
-        id_lokasi,
-        nama_lokasi,
-        alamat,
-        latitude,
-        longitude,
-      }));
 
     return NextResponse.json({
       nama_lengkap: pendonor.nama_lengkap,
