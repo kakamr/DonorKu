@@ -3,16 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { getMobileTokenPayload } from "@/lib/mobileAuth";
 import { cekJarakDonorTerakhir } from "@/lib/donorEligibility";
 
-/**
- * Bikin objek Date jam "sekarang", tapi pakai tanggal referensi 1970-01-01
- * (sama seperti cara Prisma menyimpan kolom bertipe Time), supaya bisa
- * dibandingkan langsung dengan kolom jam_selesai.
- *
- * PENTING: kalau setelah dites ternyata perbandingan jam_selesai masih
- * tidak akurat, kemungkinan besar penyebabnya di sini -- coba log
- * `jamSekarang` dan bandingkan manual sama nilai jam_selesai di database
- * buat mastiin formatnya cocok.
- */
 function jamSekarangUntukKolomTime(): Date {
   const now = new Date();
   return new Date(Date.UTC(1970, 0, 1, now.getHours(), now.getMinutes(), now.getSeconds()));
@@ -35,31 +25,28 @@ export async function GET(req: NextRequest) {
     });
 
     const totalDonasi = riwayatBerhasil.length;
-    const totalMlDarah = riwayatBerhasil.reduce((sum, r) => sum + (r.darah_terkumpul ?? 0), 0);
+    const totalMlDarah = riwayatBerhasil.reduce(
+      (sum: number, r: (typeof riwayatBerhasil)[number]) => sum + (r.darah_terkumpul ?? 0),
+      0,
+    );
 
     const kelayakan = await cekJarakDonorTerakhir(pendonor.id_pendonor, pendonor.jenis_kelamin);
 
-    // --- Filter lokasi: cuma yang masih punya jadwal aktif (belum lewat) ---
-    const hariIni = new Date(new Date().toDateString()); // jam 00:00 hari ini
+    const hariIni = new Date(new Date().toDateString());
     const jamSekarang = jamSekarangUntukKolomTime();
 
-    const lokasi = await prisma.lokasiDonor.findMany({
-      where: {
-        jadwal_donor: {
-          some: {
-            status_jadwal: "aktif",
-            OR: [
-              // Jadwal di hari SETELAH hari ini -> otomatis masih berlaku
-              { tanggal_pelaksanaan: { gt: hariIni } },
-              // Jadwal HARI INI -> jam_selesai-nya belum lewat jam sekarang
-              {
-                tanggal_pelaksanaan: hariIni,
-                jam_selesai: { gt: jamSekarang },
-              },
-            ],
-          },
-        },
-      },
+    // Filter jadwal aktif yang dipakai di 2 tempat (where utama & nested
+    // select), disatukan di 1 variabel biar tidak duplikat & gampang diubah.
+    const filterJadwalAktif = {
+      status_jadwal: "aktif" as const,
+      OR: [
+        { tanggal_pelaksanaan: { gt: hariIni } },
+        { tanggal_pelaksanaan: hariIni, jam_selesai: { gt: jamSekarang } },
+      ],
+    };
+
+    const kandidatLokasi = await prisma.lokasiDonor.findMany({
+      where: { jadwal_donor: { some: filterJadwalAktif } },
       take: 5,
       select: {
         id_lokasi: true,
@@ -67,9 +54,26 @@ export async function GET(req: NextRequest) {
         alamat: true,
         latitude: true,
         longitude: true,
-        foto_lokasi: true,
+        foto_lokasi: true, // fallback, kalau jadwalnya tidak punya foto sendiri
+        jadwal_donor: {
+          where: filterJadwalAktif,
+          select: { foto_lokasi: true },
+          take: 1, // cukup 1 jadwal aktif buat ambil fotonya
+        },
       },
     });
+
+    // Prioritas: foto dari JADWAL aktifnya dulu (itu yang biasanya diisi
+    // admin pas bikin jadwal donor), baru fallback ke foto di level
+    // Lokasi sendiri kalau jadwalnya kebetulan tidak ada foto.
+    const lokasi = kandidatLokasi.map((l: (typeof kandidatLokasi)[number]) => ({
+      id_lokasi: l.id_lokasi,
+      nama_lokasi: l.nama_lokasi,
+      alamat: l.alamat,
+      latitude: l.latitude,
+      longitude: l.longitude,
+      foto_lokasi: l.jadwal_donor[0]?.foto_lokasi ?? l.foto_lokasi ?? null,
+    }));
 
     return NextResponse.json({
       nama_lengkap: pendonor.nama_lengkap,
