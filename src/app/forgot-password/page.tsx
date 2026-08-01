@@ -52,6 +52,7 @@ export default function ForgotPasswordPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <input
+            required
             id="email"
             type="email"
             placeholder="Masukan email mu"

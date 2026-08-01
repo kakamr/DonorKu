@@ -47,7 +47,9 @@ export default function VerifyEmailPage() {
     }
   };
 
-  const handleVerify = async () => {
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     const fullCode = code.join("");
 
     const res = await fetch("/api/web/auth/verify-otp", {
@@ -110,31 +112,33 @@ export default function VerifyEmailPage() {
           Masukan kode yang ada di email
         </p>
 
-        <div className="mb-8 flex gap-3">
-          {code.map((digit, index) => (
-            <input
-              key={index}
-              ref={(el) => {
-                inputsRef.current[index] = el;
-              }}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleChange(index, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              className="h-16 w-16 rounded-xl border border-gray-300 text-center text-xl text-black focus:outline-none focus:ring-2 focus:ring-red-400"
-            />
-          ))}
-        </div>
+        <form onSubmit={handleVerify}>
+          <div className="mb-8 flex gap-3">
+            {code.map((digit, index) => (
+              <input
+                required
+                key={index}
+                ref={(el) => {
+                  inputsRef.current[index] = el;
+                }}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleChange(index, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
+                className="h-16 w-16 rounded-xl border border-gray-300 text-center text-xl text-black focus:outline-none focus:ring-2 focus:ring-red-400"
+              />
+            ))}
+          </div>
 
-        <button
-          type="button"
-          onClick={handleVerify}
-          className="mb-6 w-full rounded-full bg-gradient-to-r from-red-500 to-red-600 py-4 text-lg font-medium text-white shadow-md transition hover:brightness-105"
-        >
-          Verifikasi
-        </button>
+          <button
+            type="submit"
+            className="mb-6 w-full rounded-full bg-gradient-to-r from-red-500 to-red-600 py-4 text-lg font-medium text-white shadow-md transition hover:brightness-105"
+          >
+            Verifikasi
+          </button>
+        </form>
 
         <p className="text-base text-black">
           Belum mendapatkan kode?{" "}

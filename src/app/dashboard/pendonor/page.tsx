@@ -18,9 +18,24 @@ type Pendonor = {
   umur: number;
   tanggal_donor: string | null;
   lokasi_donor: string;
+  status_pendaftaran: "menunggu" | "diterima" | "ditolak" | "dibatalkan" | null;
 };
 
 const golonganList = ["Semua", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+const statusLabel: Record<string, string> = {
+  menunggu: "Menunggu",
+  diterima: "Diterima",
+  ditolak: "Ditolak",
+  dibatalkan: "Dibatalkan",
+};
+
+const statusColor: Record<string, string> = {
+  menunggu: "text-yellow-600",
+  diterima: "text-green-600",
+  ditolak: "text-red-600",
+  dibatalkan: "text-gray-400",
+};
 
 export default function DaftarPendonorPage() {
   const router = useRouter();
@@ -170,17 +185,18 @@ export default function DaftarPendonorPage() {
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
-            <table className="w-full min-w-[1000px] table-fixed text-left">
+            <table className="w-full min-w-[1100px] table-fixed text-left">
               <colgroup>
-                <col className="w-[70px]" />
-                <col className="w-[180px]" />
-                <col className="w-[220px]" />
-                <col className="w-[110px]" />
-                <col className="w-[130px]" />
-                <col className="w-[80px]" />
+                <col className="w-[60px]" />
                 <col className="w-[160px]" />
+                <col className="w-[200px]" />
+                <col className="w-[100px]" />
+                <col className="w-[120px]" />
+                <col className="w-[70px]" />
                 <col className="w-[140px]" />
-                <col className="w-[150px]" />
+                <col className="w-[130px]" />
+                <col className="w-[110px]" />
+                <col className="w-[90px]" />
               </colgroup>
               <thead>
                 <tr className="border-b border-gray-200 text-black">
@@ -192,13 +208,14 @@ export default function DaftarPendonorPage() {
                   <th className="px-6 py-4 font-semibold">Umur</th>
                   <th className="px-6 py-4 font-semibold">Tanggal Pendonoran</th>
                   <th className="px-6 py-4 font-semibold">Lokasi Donor</th>
+                  <th className="px-6 py-4 font-semibold">Status</th>
                   <th className="px-6 py-4 text-right font-semibold">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {loading && (
                   <tr>
-                    <td colSpan={9} className="px-6 py-6 text-center text-gray-400">
+                    <td colSpan={10} className="px-6 py-6 text-center text-gray-400">
                       Memuat data...
                     </td>
                   </tr>
@@ -206,7 +223,7 @@ export default function DaftarPendonorPage() {
 
                 {!loading && paginated.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="px-6 py-6 text-center text-gray-400">
+                    <td colSpan={10} className="px-6 py-6 text-center text-gray-400">
                       Tidak ada data
                     </td>
                   </tr>
@@ -223,6 +240,11 @@ export default function DaftarPendonorPage() {
                       <td className="truncate px-6 py-4">{p.umur}</td>
                       <td className="truncate px-6 py-4">{formatTanggal(p.tanggal_donor)}</td>
                       <td className="truncate px-6 py-4">{p.lokasi_donor}</td>
+                      <td className="truncate px-6 py-4">
+                        <span className={`font-semibold ${statusColor[p.status_pendaftaran ?? ""] ?? "text-black"}`}>
+                          {statusLabel[p.status_pendaftaran ?? ""] ?? "-"}
+                        </span>
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-end">
                           <button

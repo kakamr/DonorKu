@@ -72,6 +72,7 @@ export default function ResetPasswordPage() {
             </label>
             <div className="relative">
               <input
+                required
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Masukan Password"
@@ -96,6 +97,7 @@ export default function ResetPasswordPage() {
             </label>
             <div className="relative">
               <input
+                required
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Masukan Kembali Password"

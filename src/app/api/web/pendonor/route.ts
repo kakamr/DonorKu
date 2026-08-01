@@ -7,25 +7,35 @@ export async function GET() {
     today.setHours(0, 0, 0, 0);
 
     const pendonor = await prisma.pendonor.findMany({
+      where: {
+        pendaftaran: { some: {} },
+      },
       orderBy: { id_pendonor: "asc" },
       include: {
-        riwayat_donor: {
-          orderBy: { tanggal_donor: "desc" },
+        pendaftaran: {
+          orderBy: { tanggal_daftar: "desc" },
           take: 1,
+          include: {
+            jadwal: {
+              include: { lokasi: true },
+            },
+          },
         },
       },
     });
 
     const result = pendonor
       .filter((p) => {
-        const riwayatTerakhir = p.riwayat_donor[0];
-        if (!riwayatTerakhir) return true; 
-        const tanggalDonor = new Date(riwayatTerakhir.tanggal_donor);
+        const pendaftaranTerakhir = p.pendaftaran[0];
+        const tanggalPelaksanaan = pendaftaranTerakhir?.jadwal?.tanggal_pelaksanaan;
+        if (!tanggalPelaksanaan) return false;
+        const tanggalDonor = new Date(tanggalPelaksanaan);
         tanggalDonor.setHours(0, 0, 0, 0);
-        return tanggalDonor >= today; 
+        return tanggalDonor >= today;
       })
       .map((p) => {
-        const riwayatTerakhir = p.riwayat_donor[0];
+        const pendaftaranTerakhir = p.pendaftaran[0];
+        const jadwal = pendaftaranTerakhir?.jadwal;
         const umur = hitungUmur(p.tanggal_lahir);
 
         return {
@@ -35,8 +45,9 @@ export async function GET() {
           golongan_darah: p.golongan_darah,
           jenis_kelamin: p.jenis_kelamin,
           umur,
-          tanggal_donor: riwayatTerakhir?.tanggal_donor ?? null,
-          lokasi_donor: riwayatTerakhir?.lokasi_donor ?? "-",
+          tanggal_donor: jadwal?.tanggal_pelaksanaan ?? null,
+          lokasi_donor: jadwal?.lokasi?.nama_lokasi ?? "-",
+          status_pendaftaran: pendaftaranTerakhir?.status_pendaftaran ?? null,
         };
       });
 

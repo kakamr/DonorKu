@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getMobileTokenPayload } from "@/lib/mobileAuth";
-import { cekJarakDonorTerakhir, nilaiKelayakanKuesioner, JawabanKuesioner } from "@/lib/donorEligibility";
+import { cekJarakDonorTerakhir, JawabanKuesioner } from "@/lib/donorEligibility";
 import { buatNotifikasi } from "@/lib/notifikasi";
 
 export async function POST(req: NextRequest) {
@@ -32,13 +32,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (!jadwal.tanggal_pelaksanaan) {
-      // Seharusnya tidak pernah terjadi untuk jadwal berstatus aktif —
-      // kalau muncul, berarti ada data jadwal yang belum lengkap di sisi admin.
       console.error(`Jadwal #${jadwal.id_jadwal} aktif tapi tanggal_pelaksanaan kosong`);
       return NextResponse.json({ message: "Data jadwal tidak lengkap, hubungi admin" }, { status: 500 });
     }
 
-    // 1. Cek kuota masih ada
     const jumlahTerdaftar = await prisma.pendaftaran.count({
       where: { id_jadwal, status_pendaftaran: { in: ["diterima", "menunggu"] } },
     });
@@ -46,7 +43,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Kuota jadwal ini sudah penuh" }, { status: 409 });
     }
 
-    // 2. Cek jarak minimal dari donor terakhir
     const kelayakanJarak = await cekJarakDonorTerakhir(pendonor.id_pendonor, pendonor.jenis_kelamin);
     if (!kelayakanJarak.layak) {
       return NextResponse.json(
@@ -58,19 +54,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Nilai kuesioner kesehatan
-    const kelayakanKuesioner = nilaiKelayakanKuesioner(jawaban);
-    if (!kelayakanKuesioner.layak) {
-      return NextResponse.json(
-        {
-          message: "Anda belum memenuhi syarat kesehatan untuk donor saat ini",
-          alasan: kelayakanKuesioner.alasan,
-        },
-        { status: 400 }
-      );
-    }
 
-    // 4. Cek belum pernah daftar di jadwal yang sama
     const sudahDaftar = await prisma.pendaftaran.findFirst({
       where: { id_pendonor: pendonor.id_pendonor, id_jadwal },
     });
@@ -78,17 +62,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Anda sudah terdaftar di jadwal ini" }, { status: 409 });
     }
 
-    // 5. Simpan pendaftaran + kuesioner sekaligus (atomik)
     const nomorAntrian = jumlahTerdaftar + 1;
 
-    const hasil = await prisma.$transaction(async (tx) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const hasil = await prisma.$transaction(async (tx: any) => {
       const pendaftaran = await tx.pendaftaran.create({
         data: {
           id_admin: jadwal.id_admin,
           id_pendonor: pendonor.id_pendonor,
           id_jadwal,
           nomor_antrian: nomorAntrian,
-          status_pendaftaran: "menunggu",
+          status_pendaftaran: "menunggu", 
         },
       });
 
@@ -96,7 +80,6 @@ export async function POST(req: NextRequest) {
         data: {
           id_pendaftaran: pendaftaran.id_pendaftaran,
           ...jawaban,
-          layak_donor: true,
         },
       });
 

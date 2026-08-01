@@ -96,6 +96,7 @@ export default function EditPasswordPage() {
               <label className="mb-2 block text-2xl font-bold text-black">Password Lama</label>
               <div className="relative">
                 <input
+                  required
                   type={showLama ? "text" : "password"}
                   placeholder="Masukan Password Lama mu"
                   value={passwordLama}
@@ -116,6 +117,7 @@ export default function EditPasswordPage() {
               <label className="mb-2 block text-2xl font-bold text-black">Password Baru</label>
               <div className="relative">
                 <input
+                  required
                   type={showBaru ? "text" : "password"}
                   placeholder="Masukan Password Baru"
                   value={passwordBaru}
@@ -136,6 +138,7 @@ export default function EditPasswordPage() {
               <label className="mb-2 block text-2xl font-bold text-black">Konfirmasi Password</label>
               <div className="relative">
                 <input
+                  required
                   type={showKonfirmasi ? "text" : "password"}
                   placeholder="Masukan Kembali Password Baru"
                   value={konfirmasiPassword}

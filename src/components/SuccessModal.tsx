@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 
 type SuccessModalProps = {
@@ -32,18 +31,14 @@ export default function SuccessModal({
   const imageSrc = image ?? defaultImage[variant];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="relative w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-xl">
-        {variant === "error" && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-6 top-6 text-black hover:text-gray-600"
-          >
-            <Image src="/button/close.png" alt="keluar" width={16} height={16}/>
-          </button>
-        )}
-
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-96 max-w-full rounded-3xl bg-white p-8 text-center shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="mb-6 flex justify-center">
           {imageSrc ? (
             <Image src={imageSrc} alt={title} className="object-contain" width={100} height={100}/>
@@ -53,10 +48,8 @@ export default function SuccessModal({
             </div>
           )}
         </div>
-
         <h2 className="mb-3 text-2xl font-extrabold text-black">{title}</h2>
         <p className="mb-8 text-base text-gray-600">{description}</p>
-
         <button
           type="button"
           onClick={onClose}
