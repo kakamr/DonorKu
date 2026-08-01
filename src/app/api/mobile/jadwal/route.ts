@@ -33,9 +33,9 @@ export async function GET(req: NextRequest) {
     }
 
     const jadwal = await prisma.jadwalDonor.findMany({
-      where,
-      include: { lokasi: true },
-      orderBy: { tanggal_pelaksanaan: "asc" },
+        where,
+        include: { lokasi: true },
+        orderBy: { tanggal_pelaksanaan: "asc" },
     });
 
     const hasilDenganSisaKuota = await Promise.all(
@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
             alamat: j.lokasi.alamat,
             latitude: j.lokasi.latitude,
             longitude: j.lokasi.longitude,
-            foto_lokasi: j.lokasi.foto_lokasi,
+            foto_lokasi: j.foto_lokasi ?? j.lokasi.foto_lokasi ?? null,
           },
         };
       })
