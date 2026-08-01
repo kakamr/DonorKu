@@ -56,6 +56,7 @@ export async function GET(req: NextRequest) {
             alamat: j.lokasi.alamat,
             latitude: j.lokasi.latitude,
             longitude: j.lokasi.longitude,
+            foto_lokasi: j.lokasi.foto_lokasi,
           },
         };
       })
