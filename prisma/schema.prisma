@@ -197,9 +197,8 @@ model KuesionerKesehatan {
   baru_operasi              Boolean
   baru_vaksin               Boolean
   bersedia_sukarela         Boolean
-  layak_donor               Boolean  @default(true)
-  catatan_kelayakan         String?  @db.Text
   created_at                DateTime @default(now())
+  // layak_donor dan catatan_kelayakan DIHAPUS
 
   pendaftaran               Pendaftaran @relation(fields: [id_pendaftaran], references: [id_pendaftaran], onDelete: Cascade)
 
@@ -275,6 +274,13 @@ enum jadwal_donor_status_jadwal {
   aktif
   nonaktif
   selesai
+}
+
+enum pendaftaran_status_pendaftaran {
+  menunggu
+  diterima
+  ditolak
+  dibatalkan
 }
 
 enum pendonor_jenis_kelamin {
