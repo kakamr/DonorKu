@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const notifikasi = await prisma.notifikasi.findMany({
-      where: { id_pendonor: payload.id_pendonor },
+      where: { id_pendonor: payload.id_pendonor, is_read: false },
       orderBy: { created_at: "desc" },
       select: {
         id_notifikasi: true,
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       notifikasi.map((n: (typeof notifikasi)[number]) => ({
         id_notifikasi: n.id_notifikasi,
-        tipe: n.tipe,       // "info" | "success" | "warning"
+        tipe: n.tipe,      
         judul: n.judul,
         pesan: n.pesan,
         is_read: n.is_read,
