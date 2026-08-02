@@ -132,6 +132,30 @@ export async function POST(req: NextRequest) {
       return p;
     });
 
+    const sekarang = new Date();
+    sekarang.setHours(0, 0, 0, 0);
+    const tglJadwal = new Date(jadwal.tanggal_pelaksanaan!);
+    tglJadwal.setHours(0, 0, 0, 0);
+    const selisihHari = Math.round((tglJadwal.getTime() - sekarang.getTime()) / (1000 * 60 * 60 * 24));
+
+    let pesanNotif = "";
+    if (selisihHari === 0) {
+        pesanNotif = `Hari ini anda bisa mendonorkan darah anda di ${jadwal.lokasi.nama_lokasi}`;
+    } else if (selisihHari === 1) {
+        pesanNotif = `Jadwal donor anda akan dimulai besok di ${jadwal.lokasi.nama_lokasi}`;
+    } else {
+        pesanNotif = `Jadwal donor anda pada tanggal ${tglJadwal.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })} di ${jadwal.lokasi.nama_lokasi} telah terdaftar`;
+    }
+
+    await prisma.notifikasi.create({
+        data: {
+            id_pendonor: pendonor.id_pendonor,
+            tipe: "info",
+            judul: "Pendaftaran Donor Berhasil",
+            pesan: pesanNotif,
+        },
+    });
+
     return NextResponse.json(
       {
         message: "Pendaftaran berhasil",
