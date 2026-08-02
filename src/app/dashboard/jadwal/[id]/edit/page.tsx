@@ -15,6 +15,7 @@ const emptyForm: JadwalFormData = {
   id_lokasi: "",
   nama_penanggung_jawab: "",
   kontak_penanggung_jawab: "",
+  kuota_maksimal: "",
   total_pendaftar_online: "",
   total_pendonor_offline: "",
   pendonor_hadir: "",
@@ -29,6 +30,7 @@ export default function EditJadwalPage() {
   const [loading, setLoading] = useState(true);
   const [showEditConfirm, setShowEditConfirm] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -49,7 +51,8 @@ export default function EditJadwalPage() {
           id_lokasi: String(data.id_lokasi ?? ""),
           nama_penanggung_jawab: data.nama_penanggung_jawab ?? "",
           kontak_penanggung_jawab: data.kontak_penanggung_jawab ?? "",
-          total_pendaftar_online: data.kuota?.toString() ?? "",
+          kuota_maksimal: data.kuota?.toString() ?? "",
+          total_pendaftar_online: data.total_pendonor_online?.toString() ?? "",
           total_pendonor_offline: data.total_pendonor_offline?.toString() ?? "",
           pendonor_hadir: data.pendonor_hadir?.toString() ?? "",
           darah_terkumpul: data.darah_terkumpul?.toString() ?? "",
@@ -65,8 +68,6 @@ export default function EditJadwalPage() {
     };
     fetchDetail();
   }, [params.id]);
-
-  
 
   const handleChange = (field: keyof JadwalFormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -88,12 +89,13 @@ export default function EditJadwalPage() {
     setFoto((prev) => prev.filter((f) => f.id !== id));
   };
 
-  const handleSave = async () => {
-    if (!form.id_lokasi) {
-      alert("Silakan pilih lokasi terlebih dahulu");
-      return;
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setShowEditConfirm(true);
+  };
 
+  const handleSave = async () => {
     try {
       const res = await fetch(`/api/web/jadwal/${params.id}`, {
         method: "PUT",
@@ -107,7 +109,8 @@ export default function EditJadwalPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        alert(data.message ?? "Gagal menyimpan perubahan");
+        setError(data.message ?? "Gagal menyimpan perubahan");
+        setShowEditConfirm(false);
         return;
       }
 
@@ -115,7 +118,8 @@ export default function EditJadwalPage() {
       router.push("/dashboard/jadwal");
     } catch (error) {
       console.error(error);
-      alert("Terjadi kesalahan saat menyimpan data");
+      setError("Terjadi kesalahan saat menyimpan data");
+      setShowEditConfirm(false);
     }
   };
 
@@ -129,37 +133,45 @@ export default function EditJadwalPage() {
         </header>
 
         <main className="flex-1 px-10 pt-28 pb-8">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-5xl font-extrabold text-black">Edit Jadwal ID {params.id}</h1>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setShowBackConfirm(true)}
-                className="flex items-center gap-2 rounded-full border border-gray-200 px-5 py-3 text-black shadow-sm"
-              >
-                <Image src="/button/back.png" alt="kembali" className="rounded" width={20} height={20}/> Kembali
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowEditConfirm(true)}
-                className="flex items-center gap-2 rounded-full bg-red-600 px-6 py-3 font-medium text-white shadow-sm hover:brightness-105"
-              >
-                <Image src="/button/save.png" alt="simpan perubahan" className="rounded" width={20} height={20}/> Simpan
-              </button>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-6 flex items-center justify-between">
+              <h1 className="text-5xl font-extrabold text-black">Edit Jadwal ID {params.id}</h1>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowBackConfirm(true)}
+                  className="flex items-center gap-2 rounded-full border border-gray-200 px-5 py-3 text-black shadow-sm"
+                >
+                  <Image src="/button/back.png" alt="kembali" className="rounded" width={20} height={20}/> Kembali
+                </button>
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 rounded-full bg-red-600 px-6 py-3 font-medium text-white shadow-sm hover:brightness-105"
+                >
+                  <Image src="/button/save.png" alt="simpan perubahan" className="rounded" width={20} height={20}/> Simpan
+                </button>
+              </div>
             </div>
-          </div>
 
-          {loading ? (
-            <p className="text-gray-400">Memuat data...</p>
-          ) : (
-            <JadwalForm
-              form={form}
-              onChange={handleChange}
-              foto={foto}
-              onAddFoto={handleAddFoto}
-              onRemoveFoto={handleRemoveFoto}
-            />
-          )}
+            {error && (
+              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-red-600">
+                {error}
+              </div>
+            )}
+
+            {loading ? (
+              <p className="text-gray-400">Memuat data...</p>
+            ) : (
+              <JadwalForm
+                form={form}
+                onChange={handleChange}
+                foto={foto}
+                onAddFoto={handleAddFoto}
+                onRemoveFoto={handleRemoveFoto}
+                onUploadError={setError}
+              />
+            )}
+          </form>
         </main>
       </div>
 

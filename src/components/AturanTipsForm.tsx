@@ -45,8 +45,11 @@ export default function AturanTipsForm({ form, onChange }: AturanTipsFormProps) 
 
   return (
     <>
-      <label className="mb-2 block text-lg font-bold text-black">Judul</label>
+      <label className="mb-2 block text-lg font-bold text-black">
+        Judul<span className="text-red-500">*</span>
+      </label>
       <input
+        required
         placeholder="Masukan Judul Baru Aturan/Tips disini...."
         value={form.judul}
         onChange={(e) => onChange("judul", e.target.value)}
@@ -119,8 +122,11 @@ export default function AturanTipsForm({ form, onChange }: AturanTipsFormProps) 
         </div>
       </div>
 
-      <label className="mb-2 block text-lg font-bold text-black">Isi/Deskripsi</label>
+      <label className="mb-2 block text-lg font-bold text-black">
+        Isi/Deskripsi<span className="text-red-500">*</span>
+      </label>
       <textarea
+        required
         placeholder="Masukan Isi/Deskripsi disini...."
         value={form.isi}
         onChange={(e) => onChange("isi", e.target.value)}

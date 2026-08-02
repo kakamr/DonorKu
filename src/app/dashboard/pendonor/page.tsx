@@ -30,11 +30,11 @@ const statusLabel: Record<string, string> = {
   dibatalkan: "Dibatalkan",
 };
 
-const statusColor: Record<string, string> = {
-  menunggu: "text-yellow-600",
-  diterima: "text-green-600",
-  ditolak: "text-red-600",
-  dibatalkan: "text-gray-400",
+const statusStyle: Record<string, string> = {
+  menunggu: "bg-amber-400 text-white",
+  diterima: "bg-green-500 text-white",
+  ditolak: "bg-red-500 text-white",
+  dibatalkan: "bg-gray-400 text-white",
 };
 
 export default function DaftarPendonorPage() {
@@ -241,10 +241,14 @@ export default function DaftarPendonorPage() {
                       <td className="truncate px-6 py-4">{formatTanggal(p.tanggal_donor)}</td>
                       <td className="truncate px-6 py-4">{p.lokasi_donor}</td>
                       <td className="truncate px-6 py-4">
-                        <span className={`font-semibold ${statusColor[p.status_pendaftaran ?? ""] ?? "text-black"}`}>
-                          {statusLabel[p.status_pendaftaran ?? ""] ?? "-"}
-                        </span>
-                      </td>
+                          <span
+                            className={`inline-block rounded-full px-4 py-1 text-xs font-semibold ${
+                              statusStyle[p.status_pendaftaran ?? ""] ?? "bg-gray-300 text-black"
+                            }`}
+                          >
+                            {statusLabel[p.status_pendaftaran ?? ""] ?? "-"}
+                          </span>
+                        </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-end">
                           <button

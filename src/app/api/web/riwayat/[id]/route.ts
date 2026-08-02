@@ -11,28 +11,13 @@ export async function GET(
       where: { id_riwayat: Number(id) },
       include: { pendonor: true },
     });
-
     if (!riwayat) {
       return NextResponse.json({ message: "Data tidak ditemukan" }, { status: 404 });
     }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tanggalDonor = new Date(riwayat.tanggal_donor);
-    tanggalDonor.setHours(0, 0, 0, 0);
-
-    if (tanggalDonor >= today) {
-      return NextResponse.json(
-        { message: "Data ini termasuk jadwal pendonoran, bukan riwayat" },
-        { status: 400 }
-      );
-    }
-
     const lokasi = await prisma.lokasiDonor.findFirst({
       where: { nama_lokasi: riwayat.lokasi_donor },
       select: { alamat: true },
     });
-
     return NextResponse.json({
       ...riwayat,
       alamat_lokasi: lokasi?.alamat ?? null,
@@ -40,6 +25,41 @@ export async function GET(
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: "Gagal mengambil data" }, { status: 500 });
+  }
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  try {
+    const body = await req.json();
+    const data: { darah_terkumpul?: number; status_donor?: "berhasil" | "gagal" | "ditunda" } = {};
+
+    if (body.darah_terkumpul !== undefined) {
+      if (body.darah_terkumpul === null || isNaN(Number(body.darah_terkumpul))) {
+        return NextResponse.json({ message: "Darah terkumpul tidak valid" }, { status: 400 });
+      }
+      data.darah_terkumpul = Number(body.darah_terkumpul);
+    }
+
+    if (body.status_donor !== undefined) {
+      if (!["berhasil", "gagal", "ditunda"].includes(body.status_donor)) {
+        return NextResponse.json({ message: "Status tidak valid" }, { status: 400 });
+      }
+      data.status_donor = body.status_donor;
+    }
+
+    const riwayat = await prisma.riwayatDonor.update({
+      where: { id_riwayat: Number(id) },
+      data,
+    });
+
+    return NextResponse.json(riwayat);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "Gagal mengubah data" }, { status: 500 });
   }
 }
 

@@ -95,6 +95,7 @@ model JadwalDonor {
   nomor_antrian           Int?                       @default(0)
   nama_penanggung_jawab   String?                    @db.VarChar(100)
   kontak_penanggung_jawab String?                    @db.VarChar(20)
+  total_pendonor_online   Int?
   total_pendonor_offline  Int?
   pendonor_hadir          Int?
   darah_terkumpul         Int?
@@ -299,13 +300,6 @@ enum riwayat_donor_status_donor {
 enum aturan_dan_tips_status {
   publish
   draft
-}
-
-enum pendaftaran_status_pendaftaran {
-  menunggu
-  diterima
-  ditolak
-  batal
 }
 
 enum riwayat_donor_status_skrining {

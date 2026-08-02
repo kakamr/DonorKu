@@ -12,6 +12,7 @@ type JadwalDetail = {
   jam_mulai: string;
   jam_selesai: string;
   kuota: number;
+  total_pendonor_online: number | null;
   total_pendonor_offline: number | null;
   pendonor_hadir: number | null;
   darah_terkumpul: number | null;
@@ -195,26 +196,36 @@ export default function DetailJadwalPage() {
               <hr className="my-8 border-gray-300" />
 
               <h2 className="mb-4 text-xl font-bold text-black">Detail Donor</h2>
-              <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-                <div>
-                  <p className="text-black">Total Pendaftar (Online)</p>
-                  <p className="text-lg font-semibold text-black">{data.kuota}</p>
+                <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-6">
+                  <div>
+                    <p className="text-black">Kuota Maksimal</p>
+                    <p className="text-lg font-semibold text-black">{data.kuota}</p>
+                  </div>
+                  <div>
+                    <p className="text-black">Sisa Kuota</p>
+                    <p className="text-lg font-semibold text-black">
+                      {data.kuota - ((data.total_pendonor_online ?? 0) + (data.total_pendonor_offline ?? 0))}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-black">Total Pendaftar (Online)</p>
+                    <p className="text-lg font-semibold text-black">{data.total_pendonor_online ?? "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-black">Total Pendonor (Offline)</p>
+                    <p className="text-lg font-semibold text-black">
+                      {data.total_pendonor_offline ?? "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-black">Pendonor Hadir</p>
+                    <p className="text-lg font-semibold text-black">{data.pendonor_hadir ?? "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-black">Darah Terkumpul</p>
+                    <p className="text-lg font-semibold text-black">{data.darah_terkumpul ?? "-"}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-black">Total Pendonor (Offline)</p>
-                  <p className="text-lg font-semibold text-black">
-                    {data.total_pendonor_offline ?? "-"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-black">Pendonor Hadir</p>
-                  <p className="text-lg font-semibold text-black">{data.pendonor_hadir ?? "-"}</p>
-                </div>
-                <div>
-                  <p className="text-black">Darah Terkumpul</p>
-                  <p className="text-lg font-semibold text-black">{data.darah_terkumpul ?? "-"}</p>
-                </div>
-              </div>
 
               <hr className="my-8 border-gray-300" />
 

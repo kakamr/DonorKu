@@ -3,15 +3,13 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
     const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     const oneMonthAgo = new Date(today);
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-
-    const startOfYear = new Date(today.getFullYear(), 0, 1);
+    oneMonthAgo.setUTCMonth(oneMonthAgo.getUTCMonth() - 1);
+    const startOfYear = new Date(Date.UTC(now.getFullYear(), 0, 1));
 
     const riwayatTahunIni = await prisma.riwayatDonor.findMany({
       where: { tanggal_donor: { gte: startOfYear } },

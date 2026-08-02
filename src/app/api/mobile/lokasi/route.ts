@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getMobileTokenPayload } from "@/lib/mobileAuth";
 
-/**
- * Sama seperti di beranda/route.ts -- bikin objek Date jam "sekarang" tapi
- * pakai tanggal referensi 1970-01-01, biar bisa dibandingkan langsung
- * dengan kolom jam_selesai (tipe Time).
- */
 function jamSekarangUntukKolomTime(): Date {
   const now = new Date();
   return new Date(Date.UTC(1970, 0, 1, now.getHours(), now.getMinutes(), now.getSeconds()));
+}
+
+function formatJam(d: Date): string {
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
 export async function GET(req: NextRequest) {
@@ -25,8 +24,6 @@ export async function GET(req: NextRequest) {
     const hariIni = new Date(new Date().toDateString());
     const jamSekarang = jamSekarangUntukKolomTime();
 
-    // Filter jadwal aktif: tanggal belum lewat, ATAU tanggal hari ini
-    // tapi jam_selesai belum lewat jam sekarang (presisi sampai ke menit).
     const filterJadwalAktif = {
       status_jadwal: "aktif" as const,
       OR: [
@@ -37,8 +34,6 @@ export async function GET(req: NextRequest) {
 
     const lokasi = await prisma.lokasiDonor.findMany({
       where: {
-        // HANYA tampilkan lokasi yang punya jadwal aktif -- yang sudah
-        // lewat semua jadwalnya otomatis TIDAK ikut kekirim ke app.
         jadwal_donor: { some: filterJadwalAktif },
         ...(search
           ? {
@@ -58,26 +53,53 @@ export async function GET(req: NextRequest) {
         kota: true,
         latitude: true,
         longitude: true,
-        foto_lokasi: true, // fallback, kalau jadwalnya tidak punya foto sendiri
+        foto_lokasi: true,
         jadwal_donor: {
           where: filterJadwalAktif,
-          select: { foto_lokasi: true },
-          take: 1,
+          select: {
+            foto_lokasi: true,
+            jam_mulai: true,
+            jam_selesai: true,
+            kuota: true,
+            tanggal_pelaksanaan: true,
+            total_pendonor_offline: true,
+            // Hitung pendaftar yang diterima/menunggu untuk sisa kuota
+            pendaftaran: {
+              where: {
+                status_pendaftaran: { in: ["menunggu", "diterima"] },
+              },
+              select: { id_pendaftaran: true },
+            },
+          },
+          take: 1, // jadwal aktif terdekat
         },
       },
     });
 
-    const hasil = lokasi.map((l: (typeof lokasi)[number]) => ({
-      id_lokasi: l.id_lokasi,
-      nama_lokasi: l.nama_lokasi,
-      alamat: l.alamat,
-      kota: l.kota,
-      latitude: l.latitude,
-      longitude: l.longitude,
-      // Prioritas foto dari jadwal aktifnya, fallback ke foto Lokasi sendiri
-      foto_lokasi: l.jadwal_donor[0]?.foto_lokasi ?? l.foto_lokasi ?? null,
-      status_donor: "Open Donor Darah", // selalu ini, karena yang tanpa jadwal aktif sudah difilter di atas
-    }));
+    const hasil = lokasi.map((l: (typeof lokasi)[number]) => {
+      const jadwal = l.jadwal_donor[0] ?? null;
+      const jumlahTerdaftar = jadwal?.pendaftaran.length ?? 0;
+      const offlineTerdaftar = jadwal?.total_pendonor_offline ?? 0;
+      const sisaKuota = jadwal ? jadwal.kuota - jumlahTerdaftar - offlineTerdaftar : null;
+
+      return {
+        id_lokasi: l.id_lokasi,
+        nama_lokasi: l.nama_lokasi,
+        alamat: l.alamat,
+        kota: l.kota,
+        latitude: l.latitude,
+        longitude: l.longitude,
+        foto_lokasi: jadwal?.foto_lokasi ?? l.foto_lokasi ?? null,
+        status_donor: "Open Donor Darah",
+        // Data jadwal aktif — diambil dari jadwal_donor, bukan lokasi_donor
+        jam_mulai: jadwal ? formatJam(jadwal.jam_mulai) : null,
+        jam_selesai: jadwal ? formatJam(jadwal.jam_selesai) : null,
+        sisa_kuota: sisaKuota,
+        tanggal_pelaksanaan: jadwal?.tanggal_pelaksanaan
+          ? jadwal.tanggal_pelaksanaan.toISOString().split("T")[0]
+          : null,
+      };
+    });
 
     return NextResponse.json(hasil);
   } catch (error) {

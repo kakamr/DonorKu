@@ -14,6 +14,8 @@ type Jadwal = {
   jam_mulai: string;
   jam_selesai: string;
   kuota: number;
+  total_pendonor_online: number | null;
+  total_pendonor_offline: number | null;
   lokasi: { nama_lokasi: string; alamat: string };
   tanggal_pelaksanaan: string | null;
   nama_penanggung_jawab: string | null;
@@ -151,29 +153,29 @@ export default function JadwalDonorPage() {
           <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
             <table className="w-full min-w-[1100px] table-fixed text-left">
               <colgroup>
-                <col className="w-[60px]" />
-                <col className="w-[110px]" />
-                <col className="w-[130px]" />
-                <col className="w-[100px]" />
-                <col className="w-[100px]" />
-                <col className="w-[140px]" />
-                <col className="w-[220px]" />
-                <col className="w-[140px]" />
-                <col className="w-[170px]" />
-              </colgroup>
+                  <col className="w-[60px]" />
+                  <col className="w-[110px]" />
+                  <col className="w-[90px]" />
+                  <col className="w-[100px]" />
+                  <col className="w-[100px]" />
+                  <col className="w-[140px]" />
+                  <col className="w-[220px]" />
+                  <col className="w-[140px]" />
+                  <col className="w-[170px]" />
+                </colgroup>
               <thead>
-                <tr className="border-b border-gray-200 text-black">
-                  <th className="px-6 py-4 font-semibold">ID</th>
-                  <th className="px-6 py-4 font-semibold">Tanggal</th>
-                  <th className="px-6 py-4 font-semibold">Total Pendonor (Online)</th>
-                  <th className="px-6 py-4 font-semibold">Waktu Mulai</th>
-                  <th className="px-6 py-4 font-semibold">Waktu Selesai</th>
-                  <th className="px-6 py-4 font-semibold">Lokasi Donor</th>
-                  <th className="px-6 py-4 font-semibold">Alamat Lokasi</th>
-                  <th className="px-6 py-4 font-semibold">Penyelenggara</th>
-                  <th className="px-6 py-4 text-right font-semibold">Aksi</th>
-                </tr>
-              </thead>
+                  <tr className="border-b border-gray-200 text-black">
+                    <th className="px-6 py-4 font-semibold">ID</th>
+                    <th className="px-6 py-4 font-semibold">Tanggal</th>
+                    <th className="px-6 py-4 font-semibold">Kuota</th>
+                    <th className="px-6 py-4 font-semibold">Waktu Mulai</th>
+                    <th className="px-6 py-4 font-semibold">Waktu Selesai</th>
+                    <th className="px-6 py-4 font-semibold">Lokasi Donor</th>
+                    <th className="px-6 py-4 font-semibold">Alamat Lokasi</th>
+                    <th className="px-6 py-4 font-semibold">Penyelenggara</th>
+                    <th className="px-6 py-4 text-right font-semibold">Aksi</th>
+                  </tr>
+                </thead>
               <tbody>
                 {loading && (
                   <tr>
@@ -196,7 +198,9 @@ export default function JadwalDonorPage() {
                     <tr key={j.id_jadwal} className="border-b border-gray-100 text-black">
                       <td className="truncate px-6 py-4">{j.id_jadwal}</td>
                       <td className="truncate px-6 py-4">{formatTanggalPelaksanaan(j.tanggal_pelaksanaan)}</td>
-                      <td className="truncate px-6 py-4">{j.kuota}</td>
+                      <td className="truncate px-6 py-4">
+                        {(j.total_pendonor_online ?? 0) + (j.total_pendonor_offline ?? 0)}/{j.kuota}
+                      </td>
                       <td className="truncate px-6 py-4">{formatJam(j.jam_mulai)}</td>
                       <td className="truncate px-6 py-4">{formatJam(j.jam_selesai)}</td>
                       <td className="truncate px-6 py-4">{j.lokasi.nama_lokasi}</td>

@@ -1,5 +1,6 @@
 "use client";
 
+import DatePickerInput from "@/components/DatePickerInput";
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
@@ -19,6 +20,7 @@ export type JadwalFormData = {
   id_lokasi: string;
   nama_penanggung_jawab: string;
   kontak_penanggung_jawab: string;
+  kuota_maksimal: string;
   total_pendaftar_online: string;
   total_pendonor_offline: string;
   pendonor_hadir: string;
@@ -31,6 +33,7 @@ type JadwalFormProps = {
   foto: FotoItem[];
   onAddFoto: (items: FotoItem[]) => void;
   onRemoveFoto: (id: string) => void;
+  onUploadError?: (message: string) => void;
 };
 
 export default function JadwalForm({
@@ -39,6 +42,7 @@ export default function JadwalForm({
   foto,
   onAddFoto,
   onRemoveFoto,
+  onUploadError,
 }: JadwalFormProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [lokasiList, setLokasiList] = useState<Lokasi[]>([]);
@@ -105,7 +109,7 @@ export default function JadwalForm({
         const data = await res.json();
 
         if (!res.ok) {
-          alert(data.message ?? "Gagal upload gambar");
+          onUploadError?.(data.message ?? "Gagal upload gambar");
           onRemoveFoto(tempItem.id);
           continue;
         }
@@ -113,7 +117,7 @@ export default function JadwalForm({
         onAddFoto([{ id: tempItem.id, url: data.url, uploading: false }]);
       } catch (error) {
         console.error(error);
-        alert("Terjadi kesalahan saat upload gambar");
+        onUploadError?.("Terjadi kesalahan saat upload gambar");
         onRemoveFoto(tempItem.id);
       }
     }
@@ -125,21 +129,20 @@ export default function JadwalForm({
       <div className="mb-8 rounded-2xl border border-gray-200 p-8 shadow-sm">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           <div>
-            <label className="mb-2 block text-black">
-              Hari / Tanggal<span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={form.hari_tanggal}
-              onChange={(e) => onChange("hari_tanggal", e.target.value)}
-              className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black focus:outline-none focus:ring-2 focus:ring-red-400"
-            />
-          </div>
+              <label className="mb-2 block text-black">
+                Hari / Tanggal<span className="text-red-500">*</span>
+              </label>
+              <DatePickerInput
+                value={form.hari_tanggal}
+                onChange={(value) => onChange("hari_tanggal", value)}
+              />
+            </div>
           <div>
             <label className="mb-2 block text-black">
               Waktu Mulai<span className="text-red-500">*</span>
             </label>
             <input
+              required
               type="time"
               value={form.waktu_mulai}
               onChange={(e) => onChange("waktu_mulai", e.target.value)}
@@ -151,6 +154,7 @@ export default function JadwalForm({
               Waktu Selesai<span className="text-red-500">*</span>
             </label>
             <input
+              required
               type="time"
               value={form.waktu_selesai}
               onChange={(e) => onChange("waktu_selesai", e.target.value)}
@@ -173,6 +177,17 @@ export default function JadwalForm({
                 </span>
                 <ChevronDown size={16} className={`transition-transform ${showLokasiMenu ? "rotate-180" : ""}`} />
               </button>
+
+              {/* Input tersembunyi khusus supaya validasi "required" browser jalan
+                  di dropdown custom ini (dropdown-nya bukan <select> asli) */}
+              <input
+                required
+                value={form.id_lokasi}
+                onChange={() => {}}
+                tabIndex={-1}
+                aria-hidden="true"
+                className="absolute bottom-0 left-1/2 h-px w-px opacity-0"
+              />
 
               {showLokasiMenu && (
                 <div className="absolute left-0 z-10 mt-1 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg text-black">
@@ -228,6 +243,7 @@ export default function JadwalForm({
               Nama Penanggung Jawab<span className="text-red-500">*</span>
             </label>
             <input
+              required
               placeholder="Masukan Nama"
               value={form.nama_penanggung_jawab}
               onChange={(e) => onChange("nama_penanggung_jawab", e.target.value)}
@@ -239,6 +255,7 @@ export default function JadwalForm({
               Kontak Penanggung Jawab<span className="text-red-500">*</span>
             </label>
             <input
+              required
               placeholder="Masukan Kontak"
               value={form.kontak_penanggung_jawab}
               onChange={(e) => onChange("kontak_penanggung_jawab", e.target.value)}
@@ -249,50 +266,73 @@ export default function JadwalForm({
       </div>
 
       <h2 className="mb-4 text-xl font-bold text-black">Detail Donor</h2>
-      <div className="mb-8 rounded-2xl border border-gray-200 p-8 shadow-sm">
-        <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3">
-          <div>
-            <label className="mb-2 block text-black">
-              Total Pendaftar (Online)<span className="text-red-500">*</span>
-            </label>
-            <input
-              placeholder="Masukan Total Pendaftar Online"
-              value={form.total_pendaftar_online}
-              onChange={(e) => onChange("total_pendaftar_online", e.target.value)}
-              className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
-            />
+        <div className="mb-8 rounded-2xl border border-gray-200 p-8 shadow-sm">
+          <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-black">
+                Kuota Maksimal<span className="text-red-500">*</span>
+              </label>
+              <input
+                required
+                type="number"
+                min="1"
+                placeholder="Masukan Kuota Maksimal"
+                value={form.kuota_maksimal}
+                onChange={(e) => onChange("kuota_maksimal", e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-black">
+                Total Pendaftar (Online)<span className="text-red-500">*</span>
+              </label>
+              <input
+                required
+                type="number"
+                min="0"
+                placeholder="Masukan Total Pendaftar Online"
+                value={form.total_pendaftar_online}
+                onChange={(e) => onChange("total_pendaftar_online", e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-black">Total Pendonor (Offline)</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="Masukan Total Pendonor Offline"
+                value={form.total_pendonor_offline}
+                onChange={(e) => onChange("total_pendonor_offline", e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+              />
+            </div>
           </div>
-          <div>
-            <label className="mb-2 block text-black">Total Pendonor (Offline)</label>
-            <input
-              placeholder="Masukan Total Pendonor Offline"
-              value={form.total_pendonor_offline}
-              onChange={(e) => onChange("total_pendonor_offline", e.target.value)}
-              className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
-            />
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-black">Pendonor Hadir</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="Masukan Pendonor yang hadir"
+                value={form.pendonor_hadir}
+                onChange={(e) => onChange("pendonor_hadir", e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-black">Darah Terkumpul</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="Masukan Darah Terkumpul"
+                value={form.darah_terkumpul}
+                onChange={(e) => onChange("darah_terkumpul", e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+              />
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          <div>
-            <label className="mb-2 block text-black">Pendonor Hadir</label>
-            <input
-              placeholder="Masukan Pendonor yang hadir"
-              value={form.pendonor_hadir}
-              onChange={(e) => onChange("pendonor_hadir", e.target.value)}
-              className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
-            />
-          </div>
-          <div>
-            <label className="mb-2 block text-black">Darah Terkumpul</label>
-            <input
-              placeholder="Masukan Darah Terkumpul"
-              value={form.darah_terkumpul}
-              onChange={(e) => onChange("darah_terkumpul", e.target.value)}
-              className="w-full rounded-xl border border-gray-200 px-5 py-3 text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
-            />
-          </div>
-        </div>
-      </div>
 
       <h2 className="mb-4 text-xl font-bold text-black">Foto Lokasi</h2>
       <div className="rounded-2xl border border-gray-200 p-8 shadow-sm">

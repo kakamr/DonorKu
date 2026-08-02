@@ -179,38 +179,38 @@ export default function DetailPendonorPage() {
                 <Image src="/button/back.png" alt="kembali" className="rounded" width={20} height={20}/> Kembali
               </button>
 
-              {data && (
-                <div className="relative" ref={statusRef}>
-                  <button
-                    type="button"
-                    disabled={updating}
-                    onClick={() => setShowStatusMenu((prev) => !prev)}
-                    className="flex items-center gap-2 rounded-full bg-red-600 px-5 py-3 font-semibold text-white shadow-sm disabled:opacity-60"
-                  >
-                    Ubah Status
-                    <ChevronDown
-                      size={16}
-                      className={`transition-transform ${showStatusMenu ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {showStatusMenu && (
-                    <div className="absolute right-0 z-10 mt-2 w-40 overflow-hidden rounded-2xl bg-red-600 shadow-lg">
-                      <button
-                        onClick={() => handleUbahStatus("diterima")}
-                        className="block w-full px-4 py-3 text-center font-medium text-white hover:bg-red-700"
-                      >
-                        Diterima
-                      </button>
-                      <button
-                        onClick={() => handleUbahStatus("ditolak")}
-                        className="block w-full px-4 py-3 text-center font-medium text-white hover:bg-red-700"
-                      >
-                        Ditolak
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+              {data && data.status_pendaftaran !== "dibatalkan" && (
+                  <div className="relative" ref={statusRef}>
+                    <button
+                      type="button"
+                      disabled={updating}
+                      onClick={() => setShowStatusMenu((prev) => !prev)}
+                      className="flex items-center gap-2 rounded-full bg-red-600 px-5 py-3 font-semibold text-white shadow-sm disabled:opacity-60"
+                    >
+                      Ubah Status
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform ${showStatusMenu ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                    {showStatusMenu && (
+                      <div className="absolute right-0 z-10 mt-2 w-40 overflow-hidden rounded-2xl bg-red-600 shadow-lg">
+                        <button
+                          onClick={() => handleUbahStatus("diterima")}
+                          className="block w-full px-4 py-3 text-center font-medium text-white hover:bg-red-700"
+                        >
+                          Diterima
+                        </button>
+                        <button
+                          onClick={() => handleUbahStatus("ditolak")}
+                          className="block w-full px-4 py-3 text-center font-medium text-white hover:bg-red-700"
+                        >
+                          Ditolak
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
             </div>
           </div>
 
@@ -220,7 +220,16 @@ export default function DetailPendonorPage() {
           {!loading && data && (
             <>
               <div className="flex flex-col gap-8 md:flex-row">
-                <div className="h-75 w-75 flex-shrink-0 rounded-xl bg-gray-300" />
+                <div className="relative h-75 w-75 flex-shrink-0 overflow-hidden rounded-xl bg-gray-300">
+                  {data.foto_profil ? (
+                    <Image
+                      src={data.foto_profil}
+                      alt={data.nama_lengkap}
+                      className="object-cover"
+                      fill
+                    />
+                  ) : null}
+                </div>
 
                 <div className="flex-1">
                   <h2 className="mb-4 text-xl font-bold text-black">Detail Pendonor</h2>

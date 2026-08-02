@@ -37,6 +37,7 @@ export async function PATCH(
       const tanggalDonor = jadwal?.tanggal_pelaksanaan ?? new Date();
       const lokasiNama = jadwal?.lokasi?.nama_lokasi ?? "-";
 
+      // Cegah duplikat kalau sudah ada riwayat untuk pendonor + tanggal + lokasi yang sama
       const sudahAda = await prisma.riwayatDonor.findFirst({
         where: {
           id_pendonor: Number(id),

@@ -28,6 +28,18 @@ type Riwayat = {
   keterangan: string | null;
 };
 
+const statusLabel: Record<string, string> = {
+  berhasil: "Berhasil",
+  gagal: "Gagal",
+  ditunda: "Ditunda",
+};
+
+const statusStyle: Record<string, string> = {
+  berhasil: "bg-green-500 text-white",
+  gagal: "bg-red-500 text-white",
+  ditunda: "bg-amber-400 text-white",
+};
+
 export default function RiwayatDonorPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -175,41 +187,43 @@ export default function RiwayatDonorPage() {
           <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
             <table className="w-full min-w-[1000px] table-fixed text-left">
               <colgroup>
-                <col className="w-[70px]" />
-                <col className="w-[180px]" />
-                <col className="w-[220px]" />
-                <col className="w-[110px]" />
-                <col className="w-[130px]" />
-                <col className="w-[80px]" />
-                <col className="w-[120px]" />
-                <col className="w-[140px]" />
-                <col className="w-[150px]" />
-              </colgroup>
+                  <col className="w-[60px]" />
+                  <col className="w-[160px]" />
+                  <col className="w-[200px]" />
+                  <col className="w-[100px]" />
+                  <col className="w-[110px]" />
+                  <col className="w-[70px]" />
+                  <col className="w-[110px]" />
+                  <col className="w-[130px]" />
+                  <col className="w-[100px]" />
+                  <col className="w-[90px]" />
+                </colgroup>
               <thead>
-                <tr className="border-b border-gray-200 text-black">
-                  <th className="px-6 py-4 font-semibold">ID</th>
-                  <th className="px-6 py-4 font-semibold">Nama Lengkap</th>
-                  <th className="px-6 py-4 font-semibold">Email</th>
-                  <th className="px-6 py-4 font-semibold">Golongan darah</th>
-                  <th className="px-6 py-4 font-semibold">Jenis Kelamin</th>
-                  <th className="px-6 py-4 font-semibold">Umur</th>
-                  <th className="px-6 py-4 font-semibold">Tanggal Pendonoran</th>
-                  <th className="px-6 py-4 font-semibold">Lokasi Donor</th>
-                  <th className="px-6 py-4 text-right font-semibold">Aksi</th>
-                </tr>
-              </thead>
+                  <tr className="border-b border-gray-200 text-black">
+                    <th className="px-6 py-4 font-semibold">ID</th>
+                    <th className="px-6 py-4 font-semibold">Nama Lengkap</th>
+                    <th className="px-6 py-4 font-semibold">Email</th>
+                    <th className="px-6 py-4 font-semibold">Golongan darah</th>
+                    <th className="px-6 py-4 font-semibold">Jenis Kelamin</th>
+                    <th className="px-6 py-4 font-semibold">Umur</th>
+                    <th className="px-6 py-4 font-semibold">Tanggal Pendonoran</th>
+                    <th className="px-6 py-4 font-semibold">Lokasi Donor</th>
+                    <th className="px-6 py-4 font-semibold">Status</th>
+                    <th className="px-6 py-4 text-right font-semibold">Aksi</th>
+                  </tr>
+                </thead>
               <tbody>
                 {loading && (
                   <tr>
-                    <td colSpan={9} className="px-6 py-6 text-center text-gray-400">
+                    <td colSpan={10} className="px-6 py-6 text-center text-gray-400">
                       Memuat data...
                     </td>
                   </tr>
                 )}
-
+                
                 {!loading && paginated.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="px-6 py-6 text-center text-gray-400">
+                    <td colSpan={10} className="px-6 py-6 text-center text-gray-400">
                       Tidak ada data
                     </td>
                   </tr>
@@ -226,8 +240,17 @@ export default function RiwayatDonorPage() {
                       <td className="truncate px-6 py-4">{r.umur}</td>
                       <td className="truncate px-6 py-4">{formatTanggal(r.tanggal_donor)}</td>
                       <td className="truncate px-6 py-4">{r.lokasi_donor}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-end gap-2">
+                      <td className="truncate px-6 py-4">
+                          <span
+                            className={`inline-block rounded-full px-4 py-1 text-xs font-semibold ${
+                              statusStyle[r.status_donor] ?? "bg-gray-300 text-black"
+                            }`}
+                          >
+                            {statusLabel[r.status_donor] ?? r.status_donor}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-end gap-2">
                           <button
                             type="button"
                             onClick={() => router.push(`/dashboard/riwayat/${r.id_riwayat}`)}

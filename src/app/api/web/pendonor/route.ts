@@ -21,6 +21,9 @@ export async function GET() {
             },
           },
         },
+        riwayat_donor: {
+          select: { tanggal_donor: true },
+        },
       },
     });
 
@@ -29,9 +32,22 @@ export async function GET() {
         const pendaftaranTerakhir = p.pendaftaran[0];
         const tanggalPelaksanaan = pendaftaranTerakhir?.jadwal?.tanggal_pelaksanaan;
         if (!tanggalPelaksanaan) return false;
+
         const tanggalDonor = new Date(tanggalPelaksanaan);
         tanggalDonor.setHours(0, 0, 0, 0);
-        return tanggalDonor >= today;
+
+        // Belum lewat tanggalnya
+        if (tanggalDonor < today) return false;
+
+        // Kalau sudah ada riwayat_donor untuk tanggal ini, berarti sudah selesai donor -> jangan tampilkan lagi
+        const sudahAdaRiwayat = p.riwayat_donor.some((r) => {
+          const tglRiwayat = new Date(r.tanggal_donor);
+          tglRiwayat.setHours(0, 0, 0, 0);
+          return tglRiwayat.getTime() === tanggalDonor.getTime();
+        });
+        if (sudahAdaRiwayat) return false;
+
+        return true;
       })
       .map((p) => {
         const pendaftaranTerakhir = p.pendaftaran[0];
