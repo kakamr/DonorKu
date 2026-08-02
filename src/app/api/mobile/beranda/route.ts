@@ -8,6 +8,10 @@ function jamSekarangUntukKolomTime(): Date {
   return new Date(Date.UTC(1970, 0, 1, now.getHours(), now.getMinutes(), now.getSeconds()));
 }
 
+function formatJam(d: Date): string {
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
 export async function GET(req: NextRequest) {
   const payload = getMobileTokenPayload(req);
   if (!payload) {
@@ -35,8 +39,6 @@ export async function GET(req: NextRequest) {
     const hariIni = new Date(new Date().toDateString());
     const jamSekarang = jamSekarangUntukKolomTime();
 
-    // Filter jadwal aktif yang dipakai di 2 tempat (where utama & nested
-    // select), disatukan di 1 variabel biar tidak duplikat & gampang diubah.
     const filterJadwalAktif = {
       status_jadwal: "aktif" as const,
       OR: [
@@ -54,26 +56,47 @@ export async function GET(req: NextRequest) {
         alamat: true,
         latitude: true,
         longitude: true,
-        foto_lokasi: true, // fallback, kalau jadwalnya tidak punya foto sendiri
+        foto_lokasi: true,
         jadwal_donor: {
           where: filterJadwalAktif,
-          select: { foto_lokasi: true },
-          take: 1, // cukup 1 jadwal aktif buat ambil fotonya
+          select: {
+            foto_lokasi: true,
+            jam_mulai: true,
+            jam_selesai: true,
+            kuota: true,
+            tanggal_pelaksanaan: true,
+            pendaftaran: {
+              where: {
+                status_pendaftaran: { in: ["menunggu", "diterima"] },
+              },
+              select: { id_pendaftaran: true },
+            },
+          },
+          take: 1,
         },
       },
     });
 
-    // Prioritas: foto dari JADWAL aktifnya dulu (itu yang biasanya diisi
-    // admin pas bikin jadwal donor), baru fallback ke foto di level
-    // Lokasi sendiri kalau jadwalnya kebetulan tidak ada foto.
-    const lokasi = kandidatLokasi.map((l: (typeof kandidatLokasi)[number]) => ({
-      id_lokasi: l.id_lokasi,
-      nama_lokasi: l.nama_lokasi,
-      alamat: l.alamat,
-      latitude: l.latitude,
-      longitude: l.longitude,
-      foto_lokasi: l.jadwal_donor[0]?.foto_lokasi ?? l.foto_lokasi ?? null,
-    }));
+    const lokasi = kandidatLokasi.map((l: (typeof kandidatLokasi)[number]) => {
+      const jadwal = l.jadwal_donor[0] ?? null;
+      const jumlahTerdaftar = jadwal?.pendaftaran.length ?? 0;
+      const sisaKuota = jadwal ? jadwal.kuota - jumlahTerdaftar : null;
+
+      return {
+        id_lokasi: l.id_lokasi,
+        nama_lokasi: l.nama_lokasi,
+        alamat: l.alamat,
+        latitude: l.latitude,
+        longitude: l.longitude,
+        foto_lokasi: jadwal?.foto_lokasi ?? l.foto_lokasi ?? null,
+        jam_mulai: jadwal ? formatJam(jadwal.jam_mulai) : null,
+        jam_selesai: jadwal ? formatJam(jadwal.jam_selesai) : null,
+        sisa_kuota: sisaKuota,
+        tanggal_pelaksanaan: jadwal?.tanggal_pelaksanaan
+          ? jadwal.tanggal_pelaksanaan.toISOString().split("T")[0]
+          : null,
+      };
+    });
 
     return NextResponse.json({
       nama_lengkap: pendonor.nama_lengkap,
