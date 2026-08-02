@@ -301,6 +301,13 @@ enum aturan_dan_tips_status {
   draft
 }
 
+enum pendaftaran_status_pendaftaran {
+  menunggu
+  diterima
+  ditolak
+  batal
+}
+
 enum riwayat_donor_status_skrining {
   negatif
   positif
