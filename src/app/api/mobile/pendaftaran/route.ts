@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getMobileTokenPayload } from "@/lib/mobileAuth";
 
@@ -91,7 +92,7 @@ export async function POST(req: NextRequest) {
     const nomorAntrian = jumlahTerdaftar + 1;
 
     // Buat pendaftaran + kuesioner dalam 1 transaksi
-    const pendaftaran = await prisma.$transaction(async (tx: typeof prisma) => {
+    const pendaftaran = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const p = await tx.pendaftaran.create({
         data: {
           id_admin: pendonor.id_admin,
