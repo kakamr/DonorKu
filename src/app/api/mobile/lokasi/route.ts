@@ -1,5 +1,3 @@
-// src/app/api/mobile/lokasi/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getMobileTokenPayload } from "@/lib/mobileAuth";
@@ -63,6 +61,7 @@ export async function GET(req: NextRequest) {
             jam_mulai: true,
             jam_selesai: true,
             kuota: true,
+            tanggal_pelaksanaan: true,
             // Hitung pendaftar yang diterima/menunggu untuk sisa kuota
             pendaftaran: {
               where: {
@@ -94,6 +93,9 @@ export async function GET(req: NextRequest) {
         jam_mulai: jadwal ? formatJam(jadwal.jam_mulai) : null,
         jam_selesai: jadwal ? formatJam(jadwal.jam_selesai) : null,
         sisa_kuota: sisaKuota,
+        tanggal_pelaksanaan: jadwal?.tanggal_pelaksanaan
+          ? jadwal.tanggal_pelaksanaan.toISOString().split("T")[0]
+          : null,
       };
     });
 
