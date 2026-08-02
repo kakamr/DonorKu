@@ -65,6 +65,7 @@ export async function GET(req: NextRequest) {
             jam_selesai: true,
             kuota: true,
             tanggal_pelaksanaan: true,
+            total_pendonor_offline: true,
             pendaftaran: {
               where: {
                 status_pendaftaran: { in: ["menunggu", "diterima"] },
@@ -80,7 +81,8 @@ export async function GET(req: NextRequest) {
     const lokasi = kandidatLokasi.map((l: (typeof kandidatLokasi)[number]) => {
       const jadwal = l.jadwal_donor[0] ?? null;
       const jumlahTerdaftar = jadwal?.pendaftaran.length ?? 0;
-      const sisaKuota = jadwal ? jadwal.kuota - jumlahTerdaftar : null;
+      const offlineTerdaftar = jadwal?.total_pendonor_offline ?? 0;
+      const sisaKuota = jadwal ? Math.max(0, jadwal.kuota - jumlahTerdaftar - offlineTerdaftar) : null;
 
       return {
         id_lokasi: l.id_lokasi,

@@ -62,6 +62,7 @@ export async function GET(req: NextRequest) {
             jam_selesai: true,
             kuota: true,
             tanggal_pelaksanaan: true,
+            total_pendonor_offline: true,
             // Hitung pendaftar yang diterima/menunggu untuk sisa kuota
             pendaftaran: {
               where: {
@@ -78,7 +79,8 @@ export async function GET(req: NextRequest) {
     const hasil = lokasi.map((l: (typeof lokasi)[number]) => {
       const jadwal = l.jadwal_donor[0] ?? null;
       const jumlahTerdaftar = jadwal?.pendaftaran.length ?? 0;
-      const sisaKuota = jadwal ? jadwal.kuota - jumlahTerdaftar : null;
+      const offlineTerdaftar = jadwal?.total_pendonor_offline ?? 0;
+      const sisaKuota = jadwal ? jadwal.kuota - jumlahTerdaftar - offlineTerdaftar : null;
 
       return {
         id_lokasi: l.id_lokasi,

@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
           jam_mulai: j.jam_mulai,
           jam_selesai: j.jam_selesai,
           kuota: j.kuota,
-          sisa_kuota: Math.max(0, j.kuota - jumlahTerdaftar),
+          sisa_kuota: Math.max(0, j.kuota - jumlahTerdaftar - (j.total_pendonor_offline ?? 0)),
           lokasi: {
             id_lokasi: j.lokasi.id_lokasi,
             nama_lokasi: j.lokasi.nama_lokasi,
