@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 import { prisma } from "@/lib/prisma";
 import { getMobileTokenPayload } from "@/lib/mobileAuth";
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const payload = getMobileTokenPayload(req);
   if (!payload) {
     return NextResponse.json(
@@ -12,134 +14,62 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const pendonor = await prisma.pendonor.findUnique({
-      where: { id_pendonor: payload.id_pendonor },
-      select: {
-        id_pendonor: true,
-        nama_lengkap: true,
-        email: true,
-        no_hp: true,
-        tanggal_lahir: true,
-        alamat: true,
-        kota: true,
-        profesi: true,
-        golongan_darah: true,
-        foto_profil: true,
-        is_deleted: true,
-      },
-    });
+    const formData = await req.formData();
+    const foto = formData.get("foto") as File | null;
 
-    if (!pendonor || pendonor.is_deleted) {
+    if (!foto) {
       return NextResponse.json(
-        { message: "Akun tidak ditemukan" },
-        { status: 404 }
-      );
-    }
-
-    // Hitung total donasi & ml darah dari riwayat berhasil
-    const riwayatBerhasil = await prisma.riwayatDonor.findMany({
-      where: { id_pendonor: payload.id_pendonor, status_donor: "berhasil" },
-      select: { darah_terkumpul: true },
-    });
-
-    const totalDonasi = riwayatBerhasil.length;
-    const totalMlDarah = riwayatBerhasil.reduce(
-      (sum: number, r: (typeof riwayatBerhasil)[number]) =>
-        sum + (r.darah_terkumpul ?? 0),
-      0
-    );
-
-    return NextResponse.json({
-      nama_lengkap: pendonor.nama_lengkap,
-      email: pendonor.email,
-      no_hp: pendonor.no_hp ?? null,
-      tanggal_lahir: pendonor.tanggal_lahir.toISOString().split("T")[0],
-      alamat: pendonor.alamat ?? null,
-      kota: pendonor.kota ?? null,
-      profesi: pendonor.profesi ?? null,
-      golongan_darah: pendonor.golongan_darah,
-      foto_profil: pendonor.foto_profil ?? null,
-      total_donasi: totalDonasi,
-      total_ml_darah: totalMlDarah,
-    });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { message: "Gagal mengambil data profil" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(req: NextRequest) {
-  const payload = getMobileTokenPayload(req);
-  if (!payload) {
-    return NextResponse.json(
-      { message: "Silakan login terlebih dahulu" },
-      { status: 401 }
-    );
-  }
-
-  let body: {
-    nama_lengkap?: string;
-    no_hp?: string;
-    alamat?: string;
-    kota?: string;
-    profesi?: string;
-  };
-
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ message: "Body tidak valid" }, { status: 400 });
-  }
-
-  // Validasi minimal: kalau nama_lengkap dikirim, tidak boleh kosong
-  if (body.nama_lengkap !== undefined && body.nama_lengkap.trim() === "") {
-    return NextResponse.json(
-      { message: "Nama lengkap tidak boleh kosong" },
-      { status: 400 }
-    );
-  }
-
-  try {
-    const pendonor = await prisma.pendonor.findUnique({
-      where: { id_pendonor: payload.id_pendonor },
-      select: { is_deleted: true },
-    });
-
-    if (!pendonor || pendonor.is_deleted) {
-      return NextResponse.json(
-        { message: "Akun tidak ditemukan" },
-        { status: 404 }
-      );
-    }
-
-    // Hanya update field yang dikirim (partial update)
-    const dataUpdate: Record<string, string> = {};
-    if (body.nama_lengkap !== undefined) dataUpdate.nama_lengkap = body.nama_lengkap.trim();
-    if (body.no_hp !== undefined) dataUpdate.no_hp = body.no_hp.trim();
-    if (body.alamat !== undefined) dataUpdate.alamat = body.alamat.trim();
-    if (body.kota !== undefined) dataUpdate.kota = body.kota.trim();
-    if (body.profesi !== undefined) dataUpdate.profesi = body.profesi.trim();
-
-    if (Object.keys(dataUpdate).length === 0) {
-      return NextResponse.json(
-        { message: "Tidak ada data yang diubah" },
+        { message: "File foto wajib disertakan" },
         { status: 400 }
       );
     }
 
+    // Validasi tipe file
+    const tipeValid = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!tipeValid.includes(foto.type)) {
+      return NextResponse.json(
+        { message: "Format foto tidak valid. Gunakan JPG, PNG, atau WebP" },
+        { status: 400 }
+      );
+    }
+
+    // Validasi ukuran maksimal 5MB
+    if (foto.size > 5 * 1024 * 1024) {
+      return NextResponse.json(
+        { message: "Ukuran foto maksimal 5MB" },
+        { status: 400 }
+      );
+    }
+
+    // Buat nama file unik: timestamp-id_pendonor.ext
+    const ext = foto.name.split(".").pop() ?? "jpg";
+    const namaFile = `${Date.now()}-${payload.id_pendonor}.${ext}`;
+
+    // Pastikan folder tujuan ada
+    const folderTujuan = path.join(process.cwd(), "public", "uploads", "profil_pendonor");
+    await mkdir(folderTujuan, { recursive: true });
+
+    // Tulis file ke disk
+    const buffer = Buffer.from(await foto.arrayBuffer());
+    await writeFile(path.join(folderTujuan, namaFile), buffer);
+
+    // Path yang disimpan di database (relatif dari public/)
+    const pathDb = `/uploads/profil_pendonor/${namaFile}`;
+
+    // Update kolom foto_profil di pendonor
     await prisma.pendonor.update({
       where: { id_pendonor: payload.id_pendonor },
-      data: dataUpdate,
+      data: { foto_profil: pathDb },
     });
 
-    return NextResponse.json({ message: "Profil berhasil diperbarui" });
+    return NextResponse.json({
+      message: "Foto profil berhasil diperbarui",
+      foto_profil: pathDb,
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { message: "Gagal memperbarui profil" },
+      { message: "Gagal mengupload foto profil" },
       { status: 500 }
     );
   }
