@@ -24,9 +24,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validasi tipe file
+    // Validasi tipe file — cek MIME type atau ekstensi
     const tipeValid = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    if (!tipeValid.includes(foto.type)) {
+    const ekstensionValid = ["jpg", "jpeg", "png", "webp"];
+    const ext = foto.name.split(".").pop()?.toLowerCase() ?? "";
+    if (!tipeValid.includes(foto.type) && !ekstensionValid.includes(ext)) {
       return NextResponse.json(
         { message: "Format foto tidak valid. Gunakan JPG, PNG, atau WebP" },
         { status: 400 }
@@ -42,8 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Buat nama file unik: timestamp-id_pendonor.ext
-    const ext = foto.name.split(".").pop() ?? "jpg";
-    const namaFile = `${Date.now()}-${payload.id_pendonor}.${ext}`;
+    const namaFile = `${Date.now()}-${payload.id_pendonor}.${ext || "jpg"}`;
 
     // Pastikan folder tujuan ada
     const folderTujuan = path.join(process.cwd(), "public", "uploads", "profil_pendonor");
