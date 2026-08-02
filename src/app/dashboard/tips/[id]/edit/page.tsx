@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
+import ConfirmModal from "@/components/ConfirmModal";
 import AturanTipsForm, { AturanTipsFormData } from "@/components/AturanTipsForm";
 import UserMenu from "@/components/UserMenu";
 
@@ -19,6 +20,7 @@ export default function EditAturanTipsPage() {
   const [form, setForm] = useState<AturanTipsFormData>(emptyForm);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showEditConfirm, setShowEditConfirm] = useState(false);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -51,10 +53,13 @@ export default function EditAturanTipsPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setShowEditConfirm(true);
+  };
 
+  const handleSave = async () => {
     try {
       const res = await fetch(`/api/web/aturan-tips/${params.id}`, {
         method: "PUT",
@@ -65,13 +70,16 @@ export default function EditAturanTipsPage() {
       if (!res.ok) {
         const data = await res.json();
         setError(data.message ?? "Gagal menyimpan perubahan");
+        setShowEditConfirm(false);
         return;
       }
 
+      setShowEditConfirm(false);
       router.push("/dashboard/tips");
     } catch (error) {
       console.error(error);
       setError("Terjadi kesalahan saat menyimpan data");
+      setShowEditConfirm(false);
     }
   };
 
@@ -115,6 +123,15 @@ export default function EditAturanTipsPage() {
           )}
         </main>
       </div>
+
+      <ConfirmModal
+        isOpen={showEditConfirm}
+        variant="edit"
+        title="Konfirmasi Ubah"
+        description="Apakah anda yakin ingin mengubah Aturan/Tips saat ini?"
+        onConfirm={handleSave}
+        onCancel={() => setShowEditConfirm(false)}
+      />
     </div>
   );
 }

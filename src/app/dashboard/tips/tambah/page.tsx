@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
+import ConfirmModal from "@/components/ConfirmModal";
 import AturanTipsForm, { AturanTipsFormData } from "@/components/AturanTipsForm";
 import UserMenu from "@/components/UserMenu";
 
@@ -17,15 +18,19 @@ export default function TambahAturanTipsPage() {
   const router = useRouter();
   const [form, setForm] = useState<AturanTipsFormData>(emptyForm);
   const [error, setError] = useState<string | null>(null);
+  const [showAddConfirm, setShowAddConfirm] = useState(false);
 
   const handleChange = (field: keyof AturanTipsFormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setShowAddConfirm(true);
+  };
 
+  const handleSave = async () => {
     try {
       const res = await fetch("/api/web/aturan-tips", {
         method: "POST",
@@ -39,13 +44,16 @@ export default function TambahAturanTipsPage() {
       if (!res.ok) {
         const data = await res.json();
         setError(data.message ?? "Gagal menambah data");
+        setShowAddConfirm(false);
         return;
       }
 
+      setShowAddConfirm(false);
       router.push("/dashboard/tips");
     } catch (error) {
       console.error(error);
       setError("Terjadi kesalahan saat menyimpan data");
+      setShowAddConfirm(false);
     }
   };
 
@@ -85,6 +93,15 @@ export default function TambahAturanTipsPage() {
           </form>
         </main>
       </div>
+
+      <ConfirmModal
+        isOpen={showAddConfirm}
+        variant="add"
+        title="Konfirmasi Tambah"
+        description="Apakah anda yakin ingin menambah Aturan/Tips baru?"
+        onConfirm={handleSave}
+        onCancel={() => setShowAddConfirm(false)}
+      />
     </div>
   );
 }
