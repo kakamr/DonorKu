@@ -281,6 +281,8 @@ enum pendaftaran_status_pendaftaran {
   diterima
   ditolak
   dibatalkan
+  selesai      // pendonor hadir dan selesai donor — admin yang set
+  batal_hadir  // pendonor tidak hadir padahal sudah diterima — admin yang set
 }
 
 enum pendonor_jenis_kelamin {
@@ -297,6 +299,13 @@ enum riwayat_donor_status_donor {
 enum aturan_dan_tips_status {
   publish
   draft
+}
+
+enum pendaftaran_status_pendaftaran {
+  menunggu
+  diterima
+  ditolak
+  batal
 }
 
 enum riwayat_donor_status_skrining {
