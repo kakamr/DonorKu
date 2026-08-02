@@ -1,110 +1,95 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getMobileTokenPayload } from "@/lib/mobileAuth";
-import { cekJarakDonorTerakhir, JawabanKuesioner } from "@/lib/donorEligibility";
-import { buatNotifikasi } from "@/lib/notifikasi";
 
-export async function POST(req: NextRequest) {
+function formatJam(d: Date): string {
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+export async function POST() {
+
+}
+
+export async function GET(req: NextRequest) {
   const payload = getMobileTokenPayload(req);
   if (!payload) {
-    return NextResponse.json({ message: "Silakan login terlebih dahulu" }, { status: 401 });
+    return NextResponse.json(
+      { message: "Silakan login terlebih dahulu" },
+      { status: 401 }
+    );
   }
 
   try {
-    const body = await req.json();
-    const { id_jadwal, jawaban } = body as { id_jadwal: number; jawaban: JawabanKuesioner };
-
-    if (!id_jadwal || !jawaban) {
-      return NextResponse.json({ message: "Data pendaftaran tidak lengkap" }, { status: 400 });
-    }
-
-    const pendonor = await prisma.pendonor.findUnique({ where: { id_pendonor: payload.id_pendonor } });
-    if (!pendonor || pendonor.is_deleted) {
-      return NextResponse.json({ message: "Akun tidak ditemukan" }, { status: 404 });
-    }
-
-    const jadwal = await prisma.jadwalDonor.findUnique({
-      where: { id_jadwal },
-      include: { lokasi: true },
-    });
-    if (!jadwal || jadwal.status_jadwal !== "aktif") {
-      return NextResponse.json({ message: "Jadwal tidak tersedia" }, { status: 404 });
-    }
-
-    if (!jadwal.tanggal_pelaksanaan) {
-      console.error(`Jadwal #${jadwal.id_jadwal} aktif tapi tanggal_pelaksanaan kosong`);
-      return NextResponse.json({ message: "Data jadwal tidak lengkap, hubungi admin" }, { status: 500 });
-    }
-
-    const jumlahTerdaftar = await prisma.pendaftaran.count({
-      where: { id_jadwal, status_pendaftaran: { in: ["diterima", "menunggu"] } },
-    });
-    if (jumlahTerdaftar >= jadwal.kuota) {
-      return NextResponse.json({ message: "Kuota jadwal ini sudah penuh" }, { status: 409 });
-    }
-
-    const kelayakanJarak = await cekJarakDonorTerakhir(pendonor.id_pendonor, pendonor.jenis_kelamin);
-    if (!kelayakanJarak.layak) {
-      return NextResponse.json(
-        {
-          message: "Anda belum bisa donor lagi berdasarkan jarak minimal donor terakhir",
-          tanggal_boleh_donor: kelayakanJarak.tanggal_boleh_donor,
+    const daftarPendaftaran = await prisma.pendaftaran.findMany({
+      where: { id_pendonor: payload.id_pendonor },
+      orderBy: { tanggal_daftar: "desc" },
+      select: {
+        id_pendaftaran: true,
+        nomor_antrian: true,
+        tanggal_daftar: true,
+        status_pendaftaran: true,
+        jadwal: {
+          select: {
+            tanggal_pelaksanaan: true,
+            jam_mulai: true,
+            jam_selesai: true,
+            lokasi: { select: { nama_lokasi: true } },
+          },
         },
-        { status: 400 }
-      );
-    }
-
-
-    const sudahDaftar = await prisma.pendaftaran.findFirst({
-      where: { id_pendonor: pendonor.id_pendonor, id_jadwal },
-    });
-    if (sudahDaftar) {
-      return NextResponse.json({ message: "Anda sudah terdaftar di jadwal ini" }, { status: 409 });
-    }
-
-    const nomorAntrian = jumlahTerdaftar + 1;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const hasil = await prisma.$transaction(async (tx: any) => {
-      const pendaftaran = await tx.pendaftaran.create({
-        data: {
-          id_admin: jadwal.id_admin,
-          id_pendonor: pendonor.id_pendonor,
-          id_jadwal,
-          nomor_antrian: nomorAntrian,
-          status_pendaftaran: "menunggu", 
-        },
-      });
-
-      await tx.kuesionerKesehatan.create({
-        data: {
-          id_pendaftaran: pendaftaran.id_pendaftaran,
-          ...jawaban,
-        },
-      });
-
-      return pendaftaran;
-    });
-
-    await buatNotifikasi(
-      pendonor.id_pendonor,
-      "success",
-      `Pendaftaran donor - jadwal #${hasil.id_jadwal}`,
-      `Anda telah daftar donor di Lokasi ${jadwal.lokasi.nama_lokasi} untuk tanggal ${jadwal.tanggal_pelaksanaan.toLocaleDateString("id-ID")}`
-    );
-
-    return NextResponse.json(
-      {
-        message: "Berhasil melakukan pendaftaran",
-        id_pendaftaran: hasil.id_pendaftaran,
-        nomor_antrian: hasil.nomor_antrian,
-        lokasi: jadwal.lokasi.nama_lokasi,
-        tanggal: jadwal.tanggal_pelaksanaan,
       },
-      { status: 201 }
-    );
+    });
+
+    const semuaRiwayat = await prisma.riwayatDonor.findMany({
+      where: { id_pendonor: payload.id_pendonor },
+      select: {
+        id_riwayat: true,
+        tanggal_donor: true,
+        lokasi_donor: true,
+        status_donor: true,
+        darah_terkumpul: true,
+      },
+    });
+
+    const hasil = daftarPendaftaran.map((p: (typeof daftarPendaftaran)[number]) => {
+      const tglJadwal = p.jadwal.tanggal_pelaksanaan
+        ?.toISOString()
+        .split("T")[0];
+      const namaLokasi = p.jadwal.lokasi.nama_lokasi;
+
+      const riwayat =
+        semuaRiwayat.find(
+          (r: (typeof semuaRiwayat)[number]) =>
+            r.tanggal_donor.toISOString().split("T")[0] === tglJadwal &&
+            r.lokasi_donor === namaLokasi
+        ) ?? null;
+
+      return {
+        id_pendaftaran: p.id_pendaftaran,
+        nomor_antrian: p.nomor_antrian,
+        tanggal_daftar: p.tanggal_daftar.toISOString().split("T")[0],
+        status_pendaftaran: p.status_pendaftaran,
+        jadwal: {
+          tanggal_pelaksanaan: tglJadwal ?? null,
+          jam_mulai: formatJam(p.jadwal.jam_mulai),
+          jam_selesai: formatJam(p.jadwal.jam_selesai),
+          lokasi: namaLokasi,
+        },
+        riwayat: riwayat
+          ? {
+              id_riwayat: riwayat.id_riwayat,
+              status_donor: riwayat.status_donor,
+              darah_terkumpul: riwayat.darah_terkumpul,
+            }
+          : null,
+      };
+    });
+
+    return NextResponse.json(hasil);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: "Gagal melakukan pendaftaran" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Gagal mengambil data pendaftaran" },
+      { status: 500 }
+    );
   }
 }
