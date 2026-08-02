@@ -122,6 +122,13 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      await tx.jadwalDonor.update({
+        where: { id_jadwal },
+        data: {
+            total_pendonor_online: { increment: 1 },
+        },
+      });
+
       return p;
     });
 
