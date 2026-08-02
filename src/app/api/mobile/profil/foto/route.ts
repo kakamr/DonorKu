@@ -50,7 +50,22 @@ export async function POST(req: NextRequest) {
     const folderTujuan = path.join(process.cwd(), "public", "uploads", "profil_pendonor");
     await mkdir(folderTujuan, { recursive: true });
 
-    // Tulis file ke disk
+    // Hapus foto lama kalau ada
+    const pendonorLama = await prisma.pendonor.findUnique({
+      where: { id_pendonor: payload.id_pendonor },
+      select: { foto_profil: true },
+    });
+    if (pendonorLama?.foto_profil) {
+      const pathLama = path.join(process.cwd(), "public", pendonorLama.foto_profil);
+      try {
+        const { unlink } = await import("fs/promises");
+        await unlink(pathLama);
+      } catch {
+        // File tidak ada / sudah terhapus — tidak masalah, lanjut saja
+      }
+    }
+
+    // Tulis file baru ke disk
     const buffer = Buffer.from(await foto.arrayBuffer());
     await writeFile(path.join(folderTujuan, namaFile), buffer);
 
